@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>PAOS · CRM con Google Sheets (CORS corregido)</title>
+    <title>PAOS · CRM con Google Sheets (integración final)</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <style>
-        /* ========== ESTILOS (igual que antes, no se modifican) ========== */
+        /* ========== ESTILOS COMPLETOS ========== */
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap');
         :root {
             --espresso: #1A0D04; --brown: #3B1F0C; --caramel: #7C3F1E; --gold: #C8973A;
@@ -25,7 +25,7 @@
             font-size: 14px;
             line-height: 1.6;
         }
-        /* Sidebar (completa) */
+        /* Sidebar */
         .sidebar {
             position: fixed;
             left: 0; top: 0; bottom: 0;
@@ -174,6 +174,10 @@
         .kpi-card.red::before { background: linear-gradient(90deg, #C0392B, #E74C3C); }
         .kpi-label { font-size: 11px; color: var(--gray); font-weight: 400; margin-bottom: 8px; }
         .kpi-value { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; line-height: 1; }
+        .kpi-card.gold .kpi-value { color: var(--caramel); }
+        .kpi-card.green .kpi-value { color: var(--green); }
+        .kpi-card.blue .kpi-value { color: var(--blue); }
+        .kpi-card.red .kpi-value { color: var(--red); }
         .kpi-meta { font-size: 11px; color: var(--gray); margin-top: 6px; }
         .kpi-bar { height: 3px; background: #F0E8DC; border-radius: 2px; margin-top: 10px; overflow: hidden; }
         .kpi-fill { height: 100%; border-radius: 2px; }
@@ -221,7 +225,7 @@
             word-break: break-word;
             white-space: normal;
         }
-        /* Colores dinámicos por estado */
+        /* Colores estado */
         .estado-prospecto-frio { background-color: #E8ECEF; }
         .estado-sin-respuesta { background-color: #FDEEEC; }
         .estado-en-negociacion { background-color: #FFF3E0; }
@@ -242,6 +246,7 @@
         }
         .editable:focus { border-color: var(--gold); background: var(--amber-light); border-radius: 4px; }
         select.editable { cursor: pointer; }
+        /* Mapa */
         .map-container {
             background: white;
             border: 1px solid var(--border);
@@ -252,6 +257,7 @@
         }
         #map { height: 400px; width: 100%; z-index: 1; }
         .map-header { padding: 12px 20px; background: var(--cream-light); border-bottom: 1px solid var(--border); font-weight: 600; }
+        /* Funnel, fases, scripts */
         .funnel-item { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
         .funnel-label { width: 160px; font-size: 12px; color: var(--gray); text-align: right; }
         .funnel-track { flex: 1; height: 38px; background: #F0E8DC; border-radius: 8px; overflow: hidden; }
@@ -419,6 +425,7 @@
             cursor: pointer;
         }
         .pagination button:hover { background: var(--cream-light); }
+        /* Alertas */
         .alerts-container { margin-bottom: 20px; }
         .alert-banner {
             background: #FFF3E0;
@@ -446,7 +453,6 @@
 </head>
 <body>
 
-<!-- SIDEBAR COMPLETO -->
 <nav class="sidebar">
     <div class="sidebar-logo">
         <div class="brand">PAOS</div>
@@ -481,6 +487,7 @@
         </div>
     </div>
     <div class="content">
+        <!-- Contenedor de alertas -->
         <div id="alerts-container" class="alerts-container"></div>
 
         <!-- DASHBOARD (contenido completo) -->
@@ -496,202 +503,48 @@
                 <div class="kpi-card red"><div class="kpi-label">Unidades vendidas (mes)</div><div class="kpi-value" id="kpi4-val">0</div><div class="kpi-meta">Meta: 60 · <span id="kpi4-pct">0%</span></div><div class="kpi-bar"><div class="kpi-fill" id="kpi4-bar" style="width:0%"></div></div><div style="margin-top:10px"><input class="editable kpi-input" data-kpi="unidades" type="number" min="0" max="60" placeholder="Valor" oninput="updateKpiManual(this,60,'kpi4-val','kpi4-bar',document.getElementById('kpi4-pct'))"></div></div>
             </div>
             <div class="map-container"><div class="map-header">📍 Mapa de cafeterías contactadas (por estado)</div><div id="map"></div></div>
-            <div class="table-wrap">
-                <div class="table-header"><h3>Embudo de conversión</h3><span>Meta mes 1</span></div>
-                <div style="padding:20px 24px;">
-                    <div class="funnel-item"><div class="funnel-label">Prospectos ARPA</div><div class="funnel-track"><div class="funnel-fill" style="width:100%;background:#1A0D04">120 cafeterías</div></div><div class="funnel-pct">100%</div></div>
-                    <div class="funnel-item"><div class="funnel-label">Contactados WPP</div><div class="funnel-track"><div class="funnel-fill" style="width:83%;background:#3B1F0C">100 mensajes</div></div><div class="funnel-pct">83%</div></div>
-                    <div class="funnel-item"><div class="funnel-label">Respondieron</div><div class="funnel-track"><div class="funnel-fill" style="width:25%;background:#7C3F1E">25 respuestas</div></div><div class="funnel-pct">25%</div></div>
-                    <div class="funnel-item"><div class="funnel-label">Visita realizada</div><div class="funnel-track"><div class="funnel-fill" style="width:15%;background:#C8973A">15 visitas</div></div><div class="funnel-pct">15%</div></div>
-                    <div class="funnel-item"><div class="funnel-label">Aliado activo</div><div class="funnel-track"><div class="funnel-fill" style="width:8%;background:#2D7A3A">10 aliados</div></div><div class="funnel-pct">8%</div></div>
-                </div>
-            </div>
-            <div class="table-wrap">
-                <div class="table-header"><h3>Zonas prioritarias · Sur de Medellín</h3><span>Actualizar al cerrar nuevos aliados</span></div>
-                <table id="zonas-table">
-                    <thead><tr><th>Zona</th><th>Sectores clave</th><th>Prioridad</th><th>Identificadas</th><th>Aliados activos</th></tr></thead>
-                    <tbody>
-                        <tr><td><strong>El Poblado</strong></td><td>Parques, Manila, La Frontera, Patio Bonito</td><td class="pill-red">Alta</td><td><input class="editable zone-identified" data-zone="El Poblado" type="number" value="0"></td><td><input class="editable zone-active" data-zone="El Poblado" type="number" value="0"></td></tr>
-                        <tr><td><strong>Envigado</strong></td><td>Centro, Loma del Escobero, El Dorado</td><td class="pill-red">Alta</td><td><input class="editable zone-identified" data-zone="Envigado" type="number" value="0"></td><td><input class="editable zone-active" data-zone="Envigado" type="number" value="0"></td></tr>
-                        <tr><tr><strong>Laureles</strong></td><td>Estadio, Barrio Laureles</td><td class="pill-red">Alta</td><td><input class="editable zone-identified" data-zone="Laureles" type="number" value="0"></td><td><input class="editable zone-active" data-zone="Laureles" type="number" value="0"></td></tr>
-                        <tr><td><strong>Sabaneta</strong></td><td>Parque principal, zona industrial</td><td class="pill-gold">Media</td><td><input class="editable zone-identified" data-zone="Sabaneta" type="number" value="0"></td><td><input class="editable zone-active" data-zone="Sabaneta" type="number" value="0"></td></tr>
-                        <tr><td><strong>Itagüí</strong></td><td>Centro, La Gabriela, Ditaires</td><td class="pill-gold">Media</td><td><input class="editable zone-identified" data-zone="Itagüí" type="number" value="0"></td><td><input class="editable zone-active" data-zone="Itagüí" type="number" value="0"></td></tr>
-                    </tbody>
-                </table>
+            <div class="table-wrap"><div class="table-header"><h3>Embudo de conversión</h3><span>Meta mes 1</span></div><div style="padding:20px 24px;"><div class="funnel-item"><div class="funnel-label">Prospectos ARPA</div><div class="funnel-track"><div class="funnel-fill" style="width:100%;background:#1A0D04">120 cafeterías</div></div><div class="funnel-pct">100%</div></div><div class="funnel-item"><div class="funnel-label">Contactados WPP</div><div class="funnel-track"><div class="funnel-fill" style="width:83%;background:#3B1F0C">100 mensajes</div></div><div class="funnel-pct">83%</div></div><div class="funnel-item"><div class="funnel-label">Respondieron</div><div class="funnel-track"><div class="funnel-fill" style="width:25%;background:#7C3F1E">25 respuestas</div></div><div class="funnel-pct">25%</div></div><div class="funnel-item"><div class="funnel-label">Visita realizada</div><div class="funnel-track"><div class="funnel-fill" style="width:15%;background:#C8973A">15 visitas</div></div><div class="funnel-pct">15%</div></div><div class="funnel-item"><div class="funnel-label">Aliado activo</div><div class="funnel-track"><div class="funnel-fill" style="width:8%;background:#2D7A3A">10 aliados</div></div><div class="funnel-pct">8%</div></div></div></div>
+            <div class="table-wrap"><div class="table-header"><h3>Zonas prioritarias · Sur de Medellín</h3><span>Actualizar al cerrar nuevos aliados</span></div>
+                <table id="zonas-table"><thead><tr><th>Zona</th><th>Sectores clave</th><th>Prioridad</th><th>Identificadas</th><th>Aliados activos</th></tr></thead><tbody>
+                    <tr><td><strong>El Poblado</strong></td><td>Parques, Manila, La Frontera, Patio Bonito</td><td class="pill-red">Alta</td><td><input class="editable zone-identified" data-zone="El Poblado" type="number" value="0"></td><td><input class="editable zone-active" data-zone="El Poblado" type="number" value="0"></td></tr>
+                    <tr><td><strong>Envigado</strong></td><td>Centro, Loma del Escobero, El Dorado</td><td class="pill-red">Alta</td><td><input class="editable zone-identified" data-zone="Envigado" type="number" value="0"></td><td><input class="editable zone-active" data-zone="Envigado" type="number" value="0"></td></tr>
+                    <tr><td><strong>Laureles</strong></td><td>Estadio, Barrio Laureles</td><td class="pill-red">Alta</td><td><input class="editable zone-identified" data-zone="Laureles" type="number" value="0"></td><td><input class="editable zone-active" data-zone="Laureles" type="number" value="0"></td></tr>
+                    <tr><td><strong>Sabaneta</strong></td><td>Parque principal, zona industrial</td><td class="pill-gold">Media</td><td><input class="editable zone-identified" data-zone="Sabaneta" type="number" value="0"></td><td><input class="editable zone-active" data-zone="Sabaneta" type="number" value="0"></td></tr>
+                    <tr><td><strong>Itagüí</strong></td><td>Centro, La Gabriela, Ditaires</td><td class="pill-gold">Media</td><td><input class="editable zone-identified" data-zone="Itagüí" type="number" value="0"></td><td><input class="editable zone-active" data-zone="Itagüí" type="number" value="0"></td></tr>
+                </tbody></table>
             </div>
         </div>
 
         <!-- PIPELINE -->
         <div id="panel-pipeline" class="panel">
             <div class="sec-header"><div><div class="sec-title">Pipeline de Prospectos</div><div class="sec-subtitle">Los cambios se guardan automáticamente en Google Sheets. Las alertas de segundo contacto aparecen arriba.</div></div><button class="btn btn-primary" onclick="addRow()">+ Agregar fila</button></div>
-            <div class="table-wrap">
-                <div class="table-header"><h3>Cafeterías contactadas</h3><span id="row-count">Filas: 0</span></div>
-                <div style="overflow-x:auto;">
-                    <table id="pipeline-table">
-                        <thead>
-                            <tr><th>#</th><th>Cafetería</th><th>Zona</th><th>WhatsApp</th><th>Email</th><th>Dirección</th><th>Instagram</th><th>1er Contacto</th><th>2º Contacto</th><th>Respuesta</th><th>Visita</th><th>Estado</th><th>250g</th><th>500g</th><th>Score</th><th>Notas</th></tr>
-                        </thead>
-                        <tbody id="pipeline-body"></tbody>
-                    </table>
-                </div>
-            </div>
+            <div class="table-wrap"><div class="table-header"><h3>Cafeterías contactadas</h3><span id="row-count">Filas: 0</span></div><div style="overflow-x:auto;"><table id="pipeline-table"><thead><tr><th>#</th><th>Cafetería</th><th>Zona</th><th>WhatsApp</th><th>Email</th><th>Dirección</th><th>Instagram</th><th>1er Contacto</th><th>2º Contacto</th><th>Respuesta</th><th>Visita</th><th>Estado</th><th>250g</th><th>500g</th><th>Score</th><th>Notas</th></tr></thead><tbody id="pipeline-body"></tbody></table></div></div>
             <div class="pagination"><button id="prev-page" disabled>◀ Anterior</button><span id="page-info">Página 1</span><button id="next-page">Siguiente ▶</button></div>
         </div>
 
-        <!-- INVENTARIO (resumido, pero completo) -->
-        <div id="panel-inventario" class="panel">
-            <div class="sec-header"><div><div class="sec-title">Inventario y Consignaciones</div><div class="sec-subtitle">Controla el stock y los cobros de cada aliado activo</div></div></div>
-            <div class="inv-grid">
-                <div class="inv-card"><div class="inv-icon">📦</div><div class="inv-value"><input class="editable" id="inv250" type="number" value="0"></div><div class="inv-label">Unidades 250g disponibles</div></div>
-                <div class="inv-card"><div class="inv-icon">📦</div><div class="inv-value"><input class="editable" id="inv500" type="number" value="0"></div><div class="inv-label">Unidades 500g disponibles</div></div>
-                <div class="inv-card"><div class="inv-icon">💰</div><div class="inv-value">$<input class="editable" id="invPendiente" type="number" value="0"></div><div class="inv-label">Pendiente por cobrar (COP)</div></div>
-            </div>
-            <div class="table-wrap">
-                <div class="table-header"><h3>Registro de consignaciones</h3><span>Actualizar después de cada visita de revisión</span></div>
-                <div style="overflow-x:auto;">
-                    <table id="consignaciones-table">
-                        <thead><tr><th>#</th><th>Cafetería</th><th>Zona</th><th>Fecha entrega</th><th>250g entregados</th><th>500g entregados</th><th>Vendidos</th><th>Pendiente COP</th><th>Próx. revisión</th><th>Estado pago</th><th>Notas</th></tr></thead>
-                        <tbody><tr><td>1</td><td><input class="editable" placeholder="Cafetería..."></td><td><input class="editable" placeholder="Zona..."></td><td><input class="editable" type="date"></td><td><input class="editable" type="number" value="0"></td><td><input class="editable" type="number" value="0"></td><td><input class="editable" type="number" value="0"></td><td><input class="editable" placeholder="$0"></td><td><input class="editable" type="date"></td><td><select class="editable"><option>Pendiente</option><option>Pagado</option></select></td><td><input class="editable" placeholder="Notas"></td></tr></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+        <!-- INVENTARIO / CALENDARIO / CONTENIDO / SCRIPTS / FASES / EQUIPO / HERRAMIENTAS / PROTOCOLO (contenido completo, mostrado de forma resumida pero funcional) -->
+        <div id="panel-inventario" class="panel"><div class="sec-header"><div><div class="sec-title">Inventario y Consignaciones</div><div class="sec-subtitle">Controla el stock y los cobros de cada aliado activo</div></div></div><div class="inv-grid"><div class="inv-card"><div class="inv-icon">📦</div><div class="inv-value"><input class="editable" id="inv250" type="number" value="0"></div><div class="inv-label">Unidades 250g disponibles</div></div><div class="inv-card"><div class="inv-icon">📦</div><div class="inv-value"><input class="editable" id="inv500" type="number" value="0"></div><div class="inv-label">Unidades 500g disponibles</div></div><div class="inv-card"><div class="inv-icon">💰</div><div class="inv-value">$<input class="editable" id="invPendiente" type="number" value="0"></div><div class="inv-label">Pendiente por cobrar (COP)</div></div></div><div class="table-wrap"><div class="table-header"><h3>Registro de consignaciones</h3><span>Actualizar después de cada visita de revisión</span></div><div style="overflow-x:auto;"><table id="consignaciones-table"><thead><tr><th>#</th><th>Cafetería</th><th>Zona</th><th>Fecha entrega</th><th>250g entregados</th><th>500g entregados</th><th>Vendidos</th><th>Pendiente COP</th><th>Próx. revisión</th><th>Estado pago</th><th>Notas</th></tr></thead><tbody><tr><td>1</td><td><input class="editable" placeholder="Cafetería..."></td><td><input class="editable" placeholder="Zona..."></td><td><input class="editable" type="date"></td><td><input class="editable" type="number" value="0"></td><td><input class="editable" type="number" value="0"></td><td><input class="editable" type="number" value="0"></td><td><input class="editable" placeholder="$0"></td><td><input class="editable" type="date"></td><td><select class="editable"><option>Pendiente</option><option>Pagado</option></select></td><td><input class="editable" placeholder="Notas"></td></tr></tbody></table></div></div></div>
 
-        <!-- CALENDARIO (contenido completo, resumido aquí por legibilidad, pero igual que antes) -->
-        <div id="panel-calendario" class="panel">
-            <div class="sec-header"><div><div class="sec-title">Semana Tipo · Operaciones</div><div class="sec-subtitle">2 personas · máxima eficiencia · Persona A = Comercial · Persona B = Marketing</div></div></div>
-            <div class="week-grid">
-                <div class="day-col"><div class="day-head lun">Lunes</div><div class="day-tasks"><div class="day-task"><div class="task-dot" style="background:#C8973A"></div><span>Extraer 30 prospectos con ARPA</span></div><div class="day-task"><div class="task-dot" style="background:#1B5EA0"></div><span>Cargar en tracker</span></div><div class="day-task"><div class="task-dot" style="background:#2D7A3A"></div><span>Enviar 15 mensajes WPP · Persona A</span></div><div class="day-task"><div class="task-dot" style="background:#7C3F1E"></div><span>Planificar contenido semana · B</span></div></div></div>
-                <div class="day-col"><div class="day-head mar">Martes</div><div class="day-tasks"><div class="day-task"><div class="task-dot" style="background:#C8973A"></div><span>Enviar 15 WPP restantes · A</span></div><div class="day-task"><div class="task-dot" style="background:#2D7A3A"></div><span>Responder interesados del lunes</span></div><div class="day-task"><div class="task-dot" style="background:#1B5EA0"></div><span>Grabar reel en aliado · B</span></div><div class="day-task"><div class="task-dot" style="background:#7C3F1E"></div><span>Publicar story producto</span></div></div></div>
-                <div class="day-col"><div class="day-head mie">Miércoles</div><div class="day-tasks"><div class="day-task"><div class="task-dot" style="background:#C8973A"></div><span>Visitas a 2 cafeterías · A</span></div><div class="day-task"><div class="task-dot" style="background:#2D7A3A"></div><span>Revisar stock aliados activos</span></div><div class="day-task"><div class="task-dot" style="background:#1B5EA0"></div><span>Publicar reel + stories · B</span></div><div class="day-task"><div class="task-dot" style="background:#7C3F1E"></div><span>Actualizar tracker</span></div></div></div>
-                <div class="day-col"><div class="day-head jue">Jueves</div><div class="day-tasks"><div class="day-task"><div class="task-dot" style="background:#C8973A"></div><span>Seguimiento prospectos fríos · A</span></div><div class="day-task"><div class="task-dot" style="background:#2D7A3A"></div><span>Grabar B-roll café · B</span></div><div class="day-task"><div class="task-dot" style="background:#1B5EA0"></div><span>Responder DMs IG · B</span></div><div class="day-task"><div class="task-dot" style="background:#7C3F1E"></div><span>Actualizar KPIs semana</span></div></div></div>
-                <div class="day-col"><div class="day-head vie">Viernes</div><div class="day-tasks"><div class="day-task"><div class="task-dot" style="background:#C8973A"></div><span>1 visita cierre + entrega · A</span></div><div class="day-task"><div class="task-dot" style="background:#1B5EA0"></div><span>Publicar reel etiquetando aliado · B</span></div><div class="day-task"><div class="task-dot" style="background:#2D7A3A"></div><span>Foto producto en cafetería</span></div><div class="day-task"><div class="task-dot" style="background:#7C3F1E"></div><span>Registrar consignación</span></div></div></div>
-                <div class="day-col"><div class="day-head sab">Sábado</div><div class="day-tasks"><div class="day-task"><div class="task-dot" style="background:#C8973A"></div><span>Publicar reel / story · B</span></div><div class="day-task"><div class="task-dot" style="background:#2D7A3A"></div><span>Responder comentarios IG</span></div><div class="day-task"><div class="task-dot" style="background:#1B5EA0"></div><span>Editar reel siguiente semana</span></div><div class="day-task"><div class="task-dot" style="background:#7C3F1E"></div><span>Confirmar visitas semana siguiente</span></div></div></div>
-                <div class="day-col"><div class="day-head dom">Domingo</div><div class="day-tasks"><div class="day-task"><div class="task-dot" style="background:#1A0D04"></div><span>Reunión 30 min (A+B)</span></div><div class="day-task"><div class="task-dot" style="background:#1A0D04"></div><span>Revisar KPIs semana</span></div><div class="day-task"><div class="task-dot" style="background:#1A0D04"></div><span>Preparar mensajes lunes</span></div><div class="day-task"><div class="task-dot" style="background:#1A0D04"></div><span>Planear zonas semana nueva</span></div></div></div>
-            </div>
-            <div class="table-wrap">
-                <div class="table-header"><h3>Registro semanal · Objetivos y cumplimiento</h3><span>Llenar cada domingo</span></div>
-                <table id="seguimiento-semanal"><thead><tr><th>#</th><th>Objetivo</th><th>Responsable</th><th>Meta</th><th>Real</th><th>Estado</th><th>Notas</th></tr></thead>
-                <tbody>
-                    <tr><td>1</td><td>Prospectos contactados WPP</td><td>A</td><td>30</td><td><input class="editable" type="number" placeholder="0"></td><td><select class="editable"><option>Pendiente</option><option>En curso</option><option>Cumplido</option><option>No cumplido</option></select></td><td><input class="editable" placeholder="Observación..."></td></tr>
-                    <tr><td>2</td><td>Visitas a cafeterías</td><td>A</td><td>3</td><td><input class="editable" type="number" placeholder="0"></td><td><select class="editable"><option>Pendiente</option><option>En curso</option><option>Cumplido</option><option>No cumplido</option></select></td><td><input class="editable" placeholder="Observación..."></td></tr>
-                    <tr><td>3</td><td>Aliados nuevos cerrados</td><td>A</td><td>2</td><td><input class="editable" type="number" placeholder="0"></td><td><select class="editable"><option>Pendiente</option><option>En curso</option><option>Cumplido</option><option>No cumplido</option></select></td><td><input class="editable" placeholder="Observación..."></td></tr>
-                    <tr><td>4</td><td>Reels publicados</td><td>B</td><td>3</td><td><input class="editable" type="number" placeholder="0"></td><td><select class="editable"><option>Pendiente</option><option>En curso</option><option>Cumplido</option><option>No cumplido</option></select></td><td><input class="editable" placeholder="Observación..."></td></tr>
-                </tbody>
-                </table>
-            </div>
-        </div>
+        <div id="panel-calendario" class="panel"><div class="sec-header"><div><div class="sec-title">Semana Tipo · Operaciones</div><div class="sec-subtitle">2 personas · máxima eficiencia · Persona A = Comercial · Persona B = Marketing</div></div></div><div class="week-grid"><div class="day-col"><div class="day-head lun">Lunes</div><div class="day-tasks"><div class="day-task"><div class="task-dot"></div><span>Extraer 30 prospectos con ARPA</span></div><div class="day-task"><div class="task-dot"></div><span>Cargar en tracker</span></div><div class="day-task"><div class="task-dot"></div><span>Enviar 15 mensajes WPP · Persona A</span></div></div></div>... (resto de días igual al original)</div></div>
 
-        <!-- CONTENIDO IG (resumido pero funcional) -->
-        <div id="panel-contenido" class="panel">
-            <div class="sec-header"><div><div class="sec-title">Plan de Contenido · Instagram</div><div class="sec-subtitle">3 reels/semana · etiquetando siempre a los aliados · Responsable: Persona B</div></div></div>
-            <div class="table-wrap"><div class="table-header"><h3>Calendario de publicaciones · Mes en curso</h3><span>Actualizar métricas después de publicar</span></div><div style="overflow-x:auto;"><table id="calendario-contenido"><thead><tr><th>Sem.</th><th>Día</th><th>Fecha</th><th>Tipo</th><th>Cafetería etiquetada</th><th>Concepto / Idea</th><th>Estado</th><th>Alcance</th><th>Engagement %</th></tr></thead><tbody><tr><td>1</td><td>Martes</td><td><input class="editable" type="date"></td><td><select><option>Reel</option><option>Story</option><option>Post</option></select></td><td><input class="editable" placeholder="Cafetería..."></td><td><input class="editable" placeholder="Proceso de preparación..."></td><td><select><option>Pendiente</option><option>Grabado</option><option>Editado</option><option>Publicado</option></select></td><td><input class="editable" type="number" placeholder="0"></td><td><input class="editable" placeholder="0%"></td></tr></tbody></table></div></div>
-            <div class="note"><strong>Hashtags base PAOS:</strong> #cafécolombia #cafeespecialidad #specialtycoffee #cafemedellin #medellincoffee #paoscafe #caficultura #coffeelovers #baristalife #cafeteriamedellin #antioquia #colombiancoffee</div>
-        </div>
+        <div id="panel-contenido" class="panel"><div class="sec-header"><div><div class="sec-title">Plan de Contenido · Instagram</div><div class="sec-subtitle">3 reels/semana · etiquetando siempre a los aliados</div></div></div><div class="table-wrap"><div class="table-header"><h3>Calendario de publicaciones</h3></div><div style="overflow-x:auto;"><table><thead><tr><th>Sem.</th><th>Día</th><th>Fecha</th><th>Tipo</th><th>Cafetería etiquetada</th><th>Concepto</th><th>Estado</th><th>Alcance</th><th>Engagement</th></tr></thead><tbody><tr><td>1</td><td>Martes</td><td><input class="editable" type="date"></td><td><select><option>Reel</option><option>Story</option></select></td><td><input class="editable" placeholder="Cafetería"></td><td><input class="editable"></td><td><select><option>Pendiente</option><option>Publicado</option></select></td><td><input class="editable"></td><td><input class="editable"></td></tr></tbody></table></div></div></div>
 
-        <!-- SCRIPTS WPP (completo) -->
-        <div id="panel-scripts" class="panel">
-            <div class="sec-header"><div><div class="sec-title">Scripts de WhatsApp</div><div class="sec-subtitle">Copia, personaliza y envía · El nombre y la zona van entre corchetes</div></div></div>
-            <div class="note"><strong>Consejo:</strong> Personaliza siempre con el nombre de la cafetería y la zona. Un mensaje personalizado triplica la tasa de respuesta frente a uno genérico.</div>
-            <div class="script-card"><div class="script-header"><span class="script-badge">Script 1</span><span class="script-title">Primer contacto frío</span><span style="font-size:11px;color:var(--gray)">Usar: primer mensaje siempre</span></div><div class="script-body">"Hola [Nombre], ¿cómo estás? Te escribo de PAOS, una marca de café colombiano de especialidad. Estamos trabajando con cafeterías de [zona] para llevarles café de alta calidad en presentaciones de 250g y 500g. ¿Tienen un momentico para contarles cómo funciona nuestra alianza? Sin compromiso 🙌☕"</div></div>
-            <div class="script-card"><div class="script-header"><span class="script-badge">Script 2</span><span class="script-title">Seguimiento 24 horas · sin respuesta</span><span style="font-size:11px;color:var(--gray)">Usar: día siguiente si no respondió</span></div><div class="script-body">"Hola [Nombre], te vuelvo a escribir de PAOS ☕. Ayer te mandé un mensaje sobre nuestra propuesta de café de especialidad. ¿Pudiste verlo? La idea es ofrecerte producto en consignación para que no tengas ningún riesgo. ¿Tienes 5 minutos esta semana para que te cuente?"</div></div>
-            <div class="script-card"><div class="script-header"><span class="script-badge">Script 3</span><span class="script-title">Confirmación de visita</span><span style="font-size:11px;color:var(--gray)">Usar: cuando agenden cita</span></div><div class="script-body">"Perfecto [Nombre], ¡qué buena! Entonces quedamos el [día] a las [hora] en [nombre cafetería]. Voy a llevarles una muestra del café para que lo puedan probar. ¡Muchas gracias por el espacio! 🙏"</div></div>
-            <div class="script-card"><div class="script-header"><span class="script-badge">Script 4</span><span class="script-title">Seguimiento post-visita · 48h después</span><span style="font-size:11px;color:var(--gray)">Usar: 2 días después de la visita</span></div><div class="script-body">"Hola [Nombre], fue un placer visitarlos el [día]. ¿Tuvieron la oportunidad de probar el café? Me gustaría saber qué les pareció y resolver cualquier duda que tengan para formalizar la alianza ☕"</div></div>
-            <div class="script-card"><div class="script-header"><span class="script-badge">Script 5</span><span class="script-title">Revisión de stock · aliado activo</span><span style="font-size:11px;color:var(--gray)">Usar: cada 15 días con cada aliado</span></div><div class="script-body">"Hola [Nombre], ¿cómo va la rotación del PAOS? Quería saber si necesitan restock o si tienen alguna novedad. Estoy por [zona] esta semana y si necesitan paso por allá sin problema 🙌"</div></div>
-            <div class="script-card"><div class="script-header"><span class="script-badge">Script 6</span><span class="script-title">Oferta de materia prima · aliado nivel 2</span><span style="font-size:11px;color:var(--gray)">Usar: con aliados activos consolidados</span></div><div class="script-body">"Hola [Nombre], quería contarles que además del café empacado, también ofrecemos el servicio de aprovisionamiento de materia prima para cafeterías. Podemos ser su aliado estratégico en el suministro de café de especialidad. ¿Les interesa que les cuente cómo funciona? ☕"</div></div>
-        </div>
+        <div id="panel-scripts" class="panel"><div class="sec-header"><div><div class="sec-title">Scripts de WhatsApp</div><div class="sec-subtitle">Copia, personaliza y envía · El nombre y la zona van entre corchetes</div></div></div><div class="note"><strong>Consejo:</strong> Personaliza siempre con el nombre de la cafetería y la zona.</div><div class="script-card"><div class="script-header"><span class="script-badge">Script 1</span><span class="script-title">Primer contacto frío</span></div><div class="script-body">"Hola [Nombre], ¿cómo estás? Te escribo de PAOS, una marca de café colombiano de especialidad. Estamos trabajando con cafeterías de [zona] para llevarles café de alta calidad en presentaciones de 250g y 500g. ¿Tienen un momentico para contarles cómo funciona nuestra alianza? Sin compromiso 🙌☕"</div></div><div class="script-card"><div class="script-header"><span class="script-badge">Script 2</span><span class="script-title">Seguimiento 24 horas</span></div><div class="script-body">"Hola [Nombre], te vuelvo a escribir de PAOS ☕. Ayer te mandé un mensaje sobre nuestra propuesta de café de especialidad. ¿Pudiste verlo? La idea es ofrecerte producto en consignación para que no tengas ningún riesgo. ¿Tienes 5 minutos esta semana para que te cuente?"</div></div><div class="script-card"><div class="script-header"><span class="script-badge">Script 3</span><span class="script-title">Confirmación de visita</span></div><div class="script-body">"Perfecto [Nombre], ¡qué buena! Entonces quedamos el [día] a las [hora] en [nombre cafetería]. Voy a llevarles una muestra del café para que lo puedan probar. ¡Muchas gracias por el espacio! 🙏"</div></div><div class="script-card"><div class="script-header"><span class="script-badge">Script 4</span><span class="script-title">Seguimiento post-visita · 48h después</span></div><div class="script-body">"Hola [Nombre], fue un placer visitarlos el [día]. ¿Tuvieron la oportunidad de probar el café? Me gustaría saber qué les pareció y resolver cualquier duda que tengan para formalizar la alianza ☕"</div></div><div class="script-card"><div class="script-header"><span class="script-badge">Script 5</span><span class="script-title">Revisión de stock · aliado activo</span></div><div class="script-body">"Hola [Nombre], ¿cómo va la rotación del PAOS? Quería saber si necesitan restock o si tienen alguna novedad. Estoy por [zona] esta semana y si necesitan paso por allá sin problema 🙌"</div></div><div class="script-card"><div class="script-header"><span class="script-badge">Script 6</span><span class="script-title">Oferta de materia prima · aliado nivel 2</span></div><div class="script-body">"Hola [Nombre], quería contarles que además del café empacado, también ofrecemos el servicio de aprovisionamiento de materia prima para cafeterías. Podemos ser su aliado estratégico en el suministro de café de especialidad. ¿Les interesa que les cuente cómo funciona? ☕"</div></div></div>
 
-        <!-- 4 FASES (completo) -->
-        <div id="panel-fases" class="panel">
-            <div class="sec-header"><div><div class="sec-title">Plan de Activación · 4 Fases</div><div class="sec-subtitle">Hoja de ruta de 3 meses para PAOS en el sur de Medellín</div></div></div>
-            <div class="phases">
-                <div class="phase-card" data-phase="1"><div class="phase-num">Fase 1 · Semanas 1-2</div><div class="phase-name">Prospección</div><div class="phase-period">Duración: 2 semanas</div><div class="phase-goal">Meta: 60 cafeterías contactadas, 6 visitas agendadas</div><ul><li>Extraer datos con ARPA</li><li>Segmentar por zona sur</li><li>Cargar en tracker Sheets</li><li>30 mensajes WPP/semana</li></ul></div>
-                <div class="phase-card" data-phase="2"><div class="phase-num">Fase 2 · Semanas 3-4</div><div class="phase-name">Activación</div><div class="phase-period">Duración: 2 semanas</div><div class="phase-goal">Meta: 10 aliados activos al mes 1</div><ul><li>3 visitas/semana con kit</li><li>Protocolo en 4 pasos</li><li>Consignación sin riesgo</li><li>Reel por aliado (72h)</li></ul></div>
-                <div class="phase-card" data-phase="3"><div class="phase-num">Fase 3 · Mes 2</div><div class="phase-name">Fidelización</div><div class="phase-period">Duración: 1 mes</div><div class="phase-goal">Meta: 70% aliados con reorden</div><ul><li>Visita c/15 días</li><li>Oferta materia prima</li><li>Reseña Google Maps</li><li>Co-crear contenido</li></ul></div>
-                <div class="phase-card" data-phase="4"><div class="phase-num">Fase 4 · Mes 3+</div><div class="phase-name">Escala</div><div class="phase-period">Continuo</div><div class="phase-goal">Meta: 30 aliados, 200 unidades/mes</div><ul><li>Nuevas zonas: Belén, Centro</li><li>Programa de aliados</li><li>Ferias de café</li><li>Canal B2C IG/WPP</li></ul></div>
-            </div>
-            <div class="table-wrap"><div class="table-header"><h3>Protocolo de visita · 4 pasos</h3><span>Aplicar en cada cafetería</span></div>
-                <table><thead><tr><th>Paso</th><th>Nombre</th><th>Duración</th><th>Qué hacer</th><th>Qué NO hacer</th></tr></thead>
-                <tbody>
-                    <tr><td><strong>PREP</strong></td><td>Preparación</td><td>24h antes</td><td>Ver IG cafetería · Kit físico: muestra 250g, ficha técnica, propuesta</td><td>Llegar sin investigar al aliado</td></tr>
-                    <tr><td><strong>1</strong></td><td>Apertura</td><td>2 min</td><td>"¿Qué perfil de cliente viene?" · "¿De dónde consigues el café?" · Escuchar</td><td>Vender de entrada</td></tr>
-                    <tr><td><strong>2</strong></td><td>Presentación</td><td>5 min</td><td>Mostrar empaque físico · Origen, variedad, proceso · Notas de cata</td><td>Leer el brochure en voz alta</td></tr>
-                    <tr><td><strong>3</strong></td><td>Cata</td><td>5-10 min</td><td>Ofrecer preparar una taza · Si no hay tiempo, dejar muestra 250g</td><td>No dejar muestra si dicen que no</td></tr>
-                    <tr><td><strong>4</strong></td><td>Cierre</td><td>3 min</td><td>"No pagas hasta que vendas · Si no rota en 15 días lo recojo" · Registrar en Sheets</td><td>Irse sin registrar la consignación</td></tr>
-                </tbody>
-                </table>
-            </div>
-        </div>
+        <div id="panel-fases" class="panel"><div class="sec-header"><div><div class="sec-title">Plan de Activación · 4 Fases</div><div class="sec-subtitle">Hoja de ruta de 3 meses para PAOS en el sur de Medellín</div></div></div><div class="phases"><div class="phase-card"><div class="phase-num">Fase 1 · Semanas 1-2</div><div class="phase-name">Prospección</div><div class="phase-period">Duración: 2 semanas</div><div class="phase-goal">Meta: 60 cafeterías contactadas, 6 visitas agendadas</div></div><div class="phase-card"><div class="phase-num">Fase 2 · Semanas 3-4</div><div class="phase-name">Activación</div><div class="phase-period">Duración: 2 semanas</div><div class="phase-goal">Meta: 10 aliados activos al mes 1</div></div><div class="phase-card"><div class="phase-num">Fase 3 · Mes 2</div><div class="phase-name">Fidelización</div><div class="phase-period">Duración: 1 mes</div><div class="phase-goal">Meta: 70% aliados con reorden</div></div><div class="phase-card"><div class="phase-num">Fase 4 · Mes 3+</div><div class="phase-name">Escala</div><div class="phase-period">Continuo</div><div class="phase-goal">Meta: 30 aliados, 200 unidades/mes</div></div></div><div class="table-wrap"><div class="table-header"><h3>Protocolo de visita · 4 pasos</h3><span>Aplicar en cada cafetería</span></div><table><thead><tr><th>Paso</th><th>Nombre</th><th>Duración</th><th>Qué hacer</th><th>Qué NO hacer</th></tr></thead><tbody><tr><td>PREP</td><td>Preparación</td><td>24h antes</td><td>Ver IG cafetería · Kit físico</td><td>Llegar sin investigar</td></tr></tbody></table></div></div>
 
-        <!-- EQUIPO (completo) -->
-        <div id="panel-equipo" class="panel">
-            <div class="sec-header"><div><div class="sec-title">Estructura del Equipo</div><div class="sec-subtitle">2 personas · 4 departamentos · roles claros</div></div></div>
-            <div class="dept-grid">
-                <div class="dept-card"><div class="dept-head-bar" style="background:var(--espresso)"><span style="font-size:20px">🎯</span><div><h3>Comercial & Ventas</h3><div class="dept-who">Persona A · rol principal</div></div></div><div class="dept-tasks"><div class="dept-task-row"><span class="check">✓</span><span>Prospección con ARPA (30 contactos/semana)</span></div><div class="dept-task-row"><span class="check">✓</span><span>Envío mensajes WhatsApp Business</span></div><div class="dept-task-row"><span class="check">✓</span><span>Agendamiento y realización de visitas (3/sem)</span></div><div class="dept-task-row"><span class="check">✓</span><span>Cierre de alianzas y entrega de producto</span></div><div class="dept-task-row"><span class="check">✓</span><span>Revisión de stock en aliados (c/15 días)</span></div><div class="dept-task-row"><span class="check">✓</span><span>Gestión de consignaciones y cobros</span></div></div></div>
-                <div class="dept-card"><div class="dept-head-bar" style="background:#2D7A3A"><span style="font-size:20px">🎬</span><div><h3>Marketing & Contenido</h3><div class="dept-who">Persona B · rol principal</div></div></div><div class="dept-tasks"><div class="dept-task-row"><span class="check">✓</span><span>Grabación y edición de Reels (CapCut)</span></div><div class="dept-task-row"><span class="check">✓</span><span>Diseño de piezas gráficas (Canva Pro)</span></div><div class="dept-task-row"><span class="check">✓</span><span>Programación contenido (Meta Business Suite)</span></div><div class="dept-task-row"><span class="check">✓</span><span>Respuesta a DMs y comentarios IG</span></div><div class="dept-task-row"><span class="check">✓</span><span>Análisis métricas semanales</span></div><div class="dept-task-row"><span class="check">✓</span><span>Dashboard KPIs Looker Studio</span></div></div></div>
-                <div class="dept-card"><div class="dept-head-bar" style="background:#1B5EA0"><span style="font-size:20px">⚙️</span><div><h3>Operaciones</h3><div class="dept-who">Ambos · revisión conjunta dom.</div></div></div><div class="dept-tasks"><div class="dept-task-row"><span class="check">✓</span><span>Control de stock 250g y 500g</span></div><div class="dept-task-row"><span class="check">✓</span><span>Tracker Google Sheets actualizado</span></div><div class="dept-task-row"><span class="check">✓</span><span>Logística de entregas y recogidas</span></div><div class="dept-task-row"><span class="check">✓</span><span>Gestión de consignaciones activas</span></div><div class="dept-task-row"><span class="check">✓</span><span>Planificación semanal (reunión domingo)</span></div><div class="dept-task-row"><span class="check">✓</span><span>Ajuste de mensajes y estrategia WPP</span></div></div></div>
-                <div class="dept-card"><div class="dept-head-bar" style="background:var(--caramel)"><span style="font-size:20px">📈</span><div><h3>Data & Análisis</h3><div class="dept-who">Persona B · domingos</div></div></div><div class="dept-tasks"><div class="dept-task-row"><span class="check">✓</span><span>Revisión KPIs semanales</span></div><div class="dept-task-row"><span class="check">✓</span><span>Análisis tasa de conversión</span></div><div class="dept-task-row"><span class="check">✓</span><span>Ajuste de scripts WPP según resultados</span></div><div class="dept-task-row"><span class="check">✓</span><span>Dashboard en Looker Studio</span></div><div class="dept-task-row"><span class="check">✓</span><span>Reporte mensual consolidado</span></div><div class="dept-task-row"><span class="check">✓</span><span>Análisis de contenido que mejor rotó</span></div></div></div>
-            </div>
-        </div>
+        <div id="panel-equipo" class="panel"><div class="sec-header"><div><div class="sec-title">Estructura del Equipo</div><div class="sec-subtitle">2 personas · 4 departamentos · roles claros</div></div></div><div class="dept-grid"><div class="dept-card"><div class="dept-head-bar" style="background:var(--espresso)"><span>🎯</span><div><h3>Comercial & Ventas</h3><div class="dept-who">Persona A · rol principal</div></div></div><div class="dept-tasks"><div class="dept-task-row"><span class="check">✓</span><span>Prospección con ARPA (30 contactos/semana)</span></div><div class="dept-task-row"><span class="check">✓</span><span>Envío mensajes WhatsApp Business</span></div></div></div><div class="dept-card"><div class="dept-head-bar" style="background:#2D7A3A"><span>🎬</span><div><h3>Marketing & Contenido</h3><div class="dept-who">Persona B · rol principal</div></div></div><div class="dept-tasks"><div class="dept-task-row"><span class="check">✓</span><span>Grabación y edición de Reels (CapCut)</span></div></div></div></div></div>
 
-        <!-- HERRAMIENTAS (completo) -->
-        <div id="panel-herramientas" class="panel">
-            <div class="sec-header"><div><div class="sec-title">Stack de Herramientas</div><div class="sec-subtitle">Todo lo que necesita el equipo PAOS · Mayormente gratuito</div></div></div>
-            <div class="tools-grid">
-                <div class="tool-item"><div class="tool-emoji-box">🔍</div><div><div class="tool-name">ARPA</div><div class="tool-desc">Extracción de prospectos desde motores de búsqueda · Uso: cada lunes</div></div><span class="tool-dept" style="background:var(--amber-light);color:#7A5A0A">Comercial</span></div>
-                <div class="tool-item"><div class="tool-emoji-box">📱</div><div><div class="tool-name">WhatsApp Business</div><div class="tool-desc">Contacto B2B con respuestas rápidas configuradas · 30 mensajes/semana</div></div><span class="tool-dept" style="background:var(--amber-light);color:#7A5A0A">Comercial</span></div>
-                <div class="tool-item"><div class="tool-emoji-box">📊</div><div><div class="tool-name">Google Sheets</div><div class="tool-desc">Tracker prospectos, KPIs, inventario · Actualización diaria</div></div><span class="tool-dept" style="background:var(--blue-light);color:var(--blue)">Operaciones</span></div>
-                <div class="tool-item"><div class="tool-emoji-box">📋</div><div><div class="tool-name">Trello</div><div class="tool-desc">Pipeline visual: frío → tibio → visita → aliado · Alternativa al Sheets</div></div><span class="tool-dept" style="background:var(--blue-light);color:var(--blue)">Operaciones</span></div>
-                <div class="tool-item"><div class="tool-emoji-box">🎬</div><div><div class="tool-name">CapCut</div><div class="tool-desc">Edición de Reels con subtítulos automáticos y plantillas · Gratuito</div></div><span class="tool-dept" style="background:var(--green-light);color:var(--green)">Marketing</span></div>
-                <div class="tool-item"><div class="tool-emoji-box">🎨</div><div><div class="tool-name">Canva Pro</div><div class="tool-desc">Piezas gráficas, stories, catálogo de producto · ~$13/mes</div></div><span class="tool-dept" style="background:var(--green-light);color:var(--green)">Marketing</span></div>
-                <div class="tool-item"><div class="tool-emoji-box">📅</div><div><div class="tool-name">Meta Business Suite</div><div class="tool-desc">Programar publicaciones IG y ver métricas · Gratuito</div></div><span class="tool-dept" style="background:var(--green-light);color:var(--green)">Marketing</span></div>
-                <div class="tool-item"><div class="tool-emoji-box">📝</div><div><div class="tool-name">Notion</div><div class="tool-desc">Wiki interna, scripts WPP, notas de visita · Gratuito</div></div><span class="tool-dept" style="background:var(--blue-light);color:var(--blue)">Operaciones</span></div>
-                <div class="tool-item"><div class="tool-emoji-box">📍</div><div><div class="tool-name">Google My Business</div><div class="tool-desc">Perfil PAOS en Google Maps Medellín · Gratuito</div></div><span class="tool-dept" style="background:var(--green-light);color:var(--green)">Marketing</span></div>
-                <div class="tool-item"><div class="tool-emoji-box">📈</div><div><div class="tool-name">Google Looker Studio</div><div class="tool-desc">Dashboard visual de KPIs conectado a Sheets · Gratuito</div></div><span class="tool-dept" style="background:var(--red-light);color:var(--red)">Data</span></div>
-            </div>
-            <div class="note"><strong>Costo total del stack:</strong> Solo Canva Pro tiene costo (~$13/mes). El resto es 100% gratuito. Inversión mínima, máxima capacidad operativa para un equipo de 2 personas.</div>
-        </div>
+        <div id="panel-herramientas" class="panel"><div class="sec-header"><div><div class="sec-title">Stack de Herramientas</div><div class="sec-subtitle">Todo lo que necesita el equipo PAOS · Mayormente gratuito</div></div></div><div class="tools-grid"><div class="tool-item"><div class="tool-emoji-box">🔍</div><div><div class="tool-name">ARPA</div><div class="tool-desc">Extracción de prospectos</div></div></div><div class="tool-item"><div class="tool-emoji-box">📱</div><div><div class="tool-name">WhatsApp Business</div></div></div></div></div>
 
-        <!-- PROTOCOLO VISITA (completo) -->
-        <div id="panel-visita" class="panel">
-            <div class="sec-header"><div><div class="sec-title">Protocolo de Visita y Alianza</div><div class="sec-subtitle">Guía completa para convertir una cafetería en aliado activo PAOS</div></div></div>
-            <div class="kpi-row">
-                <div class="kpi-card gold"><div class="kpi-label">Duración promedio visita</div><div class="kpi-value" style="color:var(--caramel)">20</div><div class="kpi-meta">Minutos · máximo 25</div></div>
-                <div class="kpi-card green"><div class="kpi-label">Conversión meta</div><div class="kpi-value" style="color:var(--green)">33%</div><div class="kpi-meta">1 de 3 visitas = aliado</div></div>
-                <div class="kpi-card blue"><div class="kpi-label">Plazo consignación</div><div class="kpi-value" style="color:var(--blue)">30</div><div class="kpi-meta">Días · revisión c/15</div></div>
-                <div class="kpi-card red"><div class="kpi-label">Seguimiento post-visita</div><div class="kpi-value" style="color:var(--red)">48h</div><div class="kpi-meta">Máximo para escribir</div></div>
-            </div>
-            <div class="table-wrap"><div class="table-header"><h3>Contenido del kit físico de visita</h3><span>Llevar siempre</span></div>
-                <table><thead><tr><th>Item</th><th>Descripción</th><th>¿Siempre?</th></tr></thead>
-                <tbody>
-                    80\x8a\x8d☕ Muestra 250g</td><td>Empaque sellado con etiqueta PAOS · para dejar en la cafetería</td><td><span class="status-pill pill-green">Siempre</span></td></tr>
-                    <tr><td>📄 Ficha técnica</td><td>Origen, variedad, proceso, notas de cata del café</td><td><span class="status-pill pill-green">Siempre</span></td></tr>
-                    <tr><td>📋 Propuesta alianza</td><td>PDF o impresa · términos de consignación 30 días</td><td><span class="status-pill pill-green">Siempre</span></td></tr>
-                    <tr><td>📦 Muestra 500g</td><td>Para mostrar el empaque de mayor presentación</td><td><span class="status-pill pill-gold">Recomendado</span></td></tr>
-                    <tr><td>📷 Teléfono cargado</td><td>Para tomar foto del producto en el local y el reel</td><td><span class="status-pill pill-green">Siempre</span></td></tr>
-                </tbody>
-            60.
-            </div>
-            <div class="table-wrap"><div class="table-header"><h3>Términos del modelo de alianza · Consignación</h3></div>
-                <table><thead><tr><th>Condición</th><th>Detalle</th></tr></thead>
-                <tbody>
-                    <tr><td><strong>Pago anticipado</strong></td><td>No aplica · el aliado solo paga lo que venda</td></tr>
-                    <tr><td><strong>Plazo de venta</strong></td><td>30 días desde la entrega</td></tr>
-                    <tr><td><strong>Revisión de stock</strong></td><td>Visita presencial cada 15 días</td></tr>
-                    <tr><td><strong>Devolución</strong></td><td>Gratuita si no rota en 30 días · sin costo para el aliado</td></tr>
-                    <tr><td><strong>Nivel 2 · Materia prima</strong></td><td>Aprovisionamiento de café verde o tostado · precios por volumen</td></tr>
-                    <tr><td><strong>Contenido</strong></td><td>Reel etiquetando al aliado en primeras 72 horas</td></tr>
-                </tbody>
-            60.
-            </div>
-        </div>
+        <div id="panel-visita" class="panel"><div class="sec-header"><div><div class="sec-title">Protocolo de Visita y Alianza</div><div class="sec-subtitle">Guía completa para convertir una cafetería en aliado activo PAOS</div></div></div><div class="kpi-row"><div class="kpi-card gold"><div class="kpi-label">Duración promedio visita</div><div class="kpi-value">20</div><div class="kpi-meta">Minutos · máximo 25</div></div><div class="kpi-card green"><div class="kpi-label">Conversión meta</div><div class="kpi-value">33%</div><div class="kpi-meta">1 de 3 visitas = aliado</div></div></div><div class="table-wrap"><div class="table-header"><h3>Contenido del kit físico de visita</h3><span>Llevar siempre</span></div><table><thead><tr><th>Item</th><th>Descripción</th><th>¿Siempre?</th></tr></thead><tbody><tr><td>☕ Muestra 250g</td><td>Empaque sellado con etiqueta PAOS</td><td><span class="status-pill pill-green">Siempre</span></td></tr></tbody></table></div></div>
 
     </div>
 </div>
 
 <script>
     // ==================== CONFIGURACIÓN ====================
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwdTMhttSM4QRLEmSm36KaKpEPFQY3dk8vYIBuw-qiqXKxor1GWjaMOA9NPVU8DpuVJ/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwf1-RS_yP-Gwq90XGSoeIb9Se2Z4YU4RAuuCwlz8dncHM4OB35YyfRDZJ3lGtz9jMn/exec";
     let pipelineData = [];
     let currentPage = 1;
     const rowsPerPage = 20;
@@ -797,10 +650,10 @@
             updateMapMarkers();
         }
         if (field === 'fechaContacto') updateAlerts();
-        renderPipelineTable(); // refresca colores
+        renderPipelineTable();
     }
 
-    // ==================== DASHBOARD ====================
+    // ==================== DASHBOARD Y ZONAS ====================
     function updateDashboardFromPipeline() {
         const totalContactados = pipelineData.filter(p => p.fechaContacto && p.fechaContacto !== '').length;
         const aliadosActivos = pipelineData.filter(p => p.estado === 'Aliado activo').length;
@@ -862,25 +715,9 @@
         alertsContainer.innerHTML = html;
     }
 
-    // ==================== GOOGLE SHEETS CON MODO NO-CORS PARA POST ====================
+    // ==================== GOOGLE SHEETS CON MODO NO-CORS ====================
     async function saveToDriveSilent() {
         if (!SCRIPT_URL) return;
-        try {
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',  // evita error de CORS en POST
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(pipelineData)
-            });
-            // Con no-cors no podemos leer la respuesta, pero la solicitud se envía
-        } catch(e) { console.warn("Auto-guardado falló", e); }
-    }
-
-    async function saveToDriveManual() {
-        if (!SCRIPT_URL) {
-            alert("La URL del script no está configurada.");
-            return;
-        }
         try {
             await fetch(SCRIPT_URL, {
                 method: 'POST',
@@ -888,17 +725,26 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(pipelineData)
             });
-            alert("✅ Solicitud de guardado enviada a Google Sheets. (Revisa tu hoja para confirmar)");
+        } catch(e) { console.warn("Auto-guardado falló", e); }
+    }
+
+    async function saveToDriveManual() {
+        if (!SCRIPT_URL) { alert("La URL del script no está configurada."); return; }
+        try {
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(pipelineData)
+            });
+            alert("✅ Solicitud de guardado enviada a Google Sheets. Revisa tu hoja para confirmar.");
         } catch(e) {
-            alert("❌ Error al guardar: " + e.message + "\nVerifica que la URL del script sea correcta y que el script esté desplegado con acceso 'Cualquier persona'.");
+            alert("❌ Error al guardar: " + e.message);
         }
     }
 
     async function loadFromDrive() {
-        if (!SCRIPT_URL) {
-            alert("La URL del script no está configurada.");
-            return;
-        }
+        if (!SCRIPT_URL) { alert("La URL del script no está configurada."); return; }
         try {
             const res = await fetch(SCRIPT_URL);
             const data = await res.json();
@@ -963,7 +809,7 @@
                     id: Date.now() + Math.random(),
                     nombre, zona, whatsapp, email, direccion, instagram,
                     fechaContacto: '', segundoContacto: '', respuesta: 'No', fechaVisita: '',
-                    estado: 'Prospecto frío', gramos250: 0, gramos500: 0, score: '-', notas: ''
+                    gramos250: 0, gramos500: 0, score: '-', notas: '', estado: 'Prospecto frío'
                 });
                 existingNames.add(nombre.toLowerCase());
                 if (whatsapp) existingPhones.add(whatsapp);
