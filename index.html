@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>PAOS · CRM con Google Sheets (WhatsApp corregido)</title>
+    <title>PAOS · CRM completo con Sheets (contenido restaurado)</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <style>
-        /* ========== ESTILOS COMPLETOS (igual que antes, no se modifican) ========== */
+        /* ========== ESTILOS COMPLETOS (no cambiar) ========== */
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap');
         :root {
             --espresso: #1A0D04; --brown: #3B1F0C; --caramel: #7C3F1E; --gold: #C8973A;
@@ -18,25 +18,118 @@
             --border: #E8DFD0; --shadow: 0 2px 12px rgba(26,13,4,0.08);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'DM Sans', sans-serif; background: var(--mist); color: var(--espresso); font-size: 14px; line-height: 1.6; }
-        .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 220px; background: var(--espresso); display: flex; flex-direction: column; z-index: 100; overflow-y: auto; }
-        .sidebar-logo { padding: 28px 20px 20px; border-bottom: 1px solid rgba(200,151,58,0.2); }
-        .sidebar-logo .brand { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--gold); letter-spacing: 2px; }
-        .sidebar-logo .tagline { font-size: 10px; color: rgba(245,236,215,0.5); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
-        .sidebar-section { padding: 16px 12px 4px; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(200,151,58,0.6); font-weight: 600; }
-        .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 16px; margin: 1px 8px; border-radius: 8px; cursor: pointer; color: rgba(245,236,215,0.7); font-size: 13px; transition: all 0.15s; border: none; background: none; width: calc(100% - 16px); text-align: left; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--mist);
+            color: var(--espresso);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0; top: 0; bottom: 0;
+            width: 220px;
+            background: var(--espresso);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            overflow-y: auto;
+        }
+        .sidebar-logo {
+            padding: 28px 20px 20px;
+            border-bottom: 1px solid rgba(200,151,58,0.2);
+        }
+        .sidebar-logo .brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            color: var(--gold);
+            letter-spacing: 2px;
+        }
+        .sidebar-logo .tagline {
+            font-size: 10px;
+            color: rgba(245,236,215,0.5);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+        .sidebar-section {
+            padding: 16px 12px 4px;
+            font-size: 9px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: rgba(200,151,58,0.6);
+            font-weight: 600;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 16px;
+            margin: 1px 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: rgba(245,236,215,0.7);
+            font-size: 13px;
+            transition: all 0.15s;
+            border: none;
+            background: none;
+            width: calc(100% - 16px);
+            text-align: left;
+        }
         .nav-item:hover { background: rgba(200,151,58,0.12); color: var(--cream); }
         .nav-item.active { background: rgba(200,151,58,0.2); color: var(--gold); font-weight: 500; }
         .nav-icon { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
-        .sidebar-bottom { margin-top: auto; padding: 16px; border-top: 1px solid rgba(200,151,58,0.15); font-size: 10px; color: rgba(245,236,215,0.3); text-align: center; }
-        .main { margin-left: 220px; min-height: 100vh; }
-        .topbar { background: white; border-bottom: 1px solid var(--border); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; position: sticky; top: 0; z-index: 50; box-shadow: 0 1px 4px rgba(26,13,4,0.05); }
+        .sidebar-bottom {
+            margin-top: auto;
+            padding: 16px;
+            border-top: 1px solid rgba(200,151,58,0.15);
+            font-size: 10px;
+            color: rgba(245,236,215,0.3);
+            text-align: center;
+        }
+        /* MAIN */
+        .main {
+            margin-left: 220px;
+            min-height: 100vh;
+        }
+        .topbar {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 14px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: 0 1px 4px rgba(26,13,4,0.05);
+        }
         .topbar-title { font-size: 16px; font-weight: 600; color: var(--espresso); }
         .topbar-subtitle { font-size: 12px; color: var(--gray); margin-top: 1px; }
         .topbar-right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-        .btn { padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: white; color: var(--espresso); transition: all 0.15s; font-family: 'DM Sans', sans-serif; text-decoration: none; display: inline-block; }
+        .btn {
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: white;
+            color: var(--espresso);
+            transition: all 0.15s;
+            font-family: 'DM Sans', sans-serif;
+            text-decoration: none;
+            display: inline-block;
+        }
         .btn:hover { background: var(--mist); }
-        .btn-primary { background: var(--espresso); color: var(--gold); border-color: var(--espresso); }
+        .btn-primary {
+            background: var(--espresso);
+            color: var(--gold);
+            border-color: var(--espresso);
+        }
         .btn-primary:hover { background: var(--brown); }
         .btn-drive { background: #4285F4; color: white; border-color: #4285F4; }
         .btn-drive:hover { background: #3367D6; }
@@ -45,12 +138,36 @@
         .content { padding: 28px 32px; }
         .panel { display: none; }
         .panel.active { display: block; }
-        .sec-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; }
-        .sec-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--espresso); }
+        .sec-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .sec-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--espresso);
+        }
         .sec-subtitle { font-size: 12px; color: var(--gray); margin-top: 3px; }
+        /* KPI Cards */
         .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
-        .kpi-card { background: white; border: 1px solid var(--border); border-radius: 14px; padding: 18px 18px 14px; position: relative; overflow: hidden; }
-        .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+        .kpi-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 18px 14px;
+            position: relative;
+            overflow: hidden;
+        }
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+        }
         .kpi-card.gold::before { background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
         .kpi-card.green::before { background: linear-gradient(90deg, #2D7A3A, #4CAF50); }
         .kpi-card.blue::before { background: linear-gradient(90deg, #1B5EA0, #4A90D9); }
@@ -60,13 +177,51 @@
         .kpi-meta { font-size: 11px; color: var(--gray); margin-top: 6px; }
         .kpi-bar { height: 3px; background: #F0E8DC; border-radius: 2px; margin-top: 10px; overflow: hidden; }
         .kpi-fill { height: 100%; border-radius: 2px; }
-        .table-wrap { background: white; border: 1px solid var(--border); border-radius: 14px; overflow-x: auto; margin-bottom: 24px; box-shadow: var(--shadow); }
-        .table-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--cream-light); flex-wrap: wrap; }
+        /* Tablas */
+        .table-wrap {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow-x: auto;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+        }
+        .table-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--cream-light);
+            flex-wrap: wrap;
+        }
         .table-header h3 { font-size: 13px; font-weight: 600; color: var(--espresso); }
-        table { width: 100%; border-collapse: collapse; min-width: 1200px; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
         thead tr { background: var(--mist); }
-        th { padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray); border-bottom: 1px solid var(--border); white-space: nowrap; }
-        td { padding: 12px 16px; font-size: 13px; border-bottom: 1px solid #F5EDE0; vertical-align: middle; word-break: break-word; white-space: normal; }
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--gray);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        td {
+            padding: 12px 16px;
+            font-size: 13px;
+            border-bottom: 1px solid #F5EDE0;
+            vertical-align: middle;
+            word-break: break-word;
+            white-space: normal;
+        }
+        /* Colores estado */
         .estado-prospecto-frio { background-color: #E8ECEF; }
         .estado-sin-respuesta { background-color: #FDEEEC; }
         .estado-en-negociacion { background-color: #FFF3E0; }
@@ -74,30 +229,97 @@
         .estado-aliado-activo { background-color: #E8F5E9; }
         .estado-inactivo { background-color: #D7CCC8; }
         tbody tr:hover { filter: brightness(0.97); }
-        .editable { background: transparent; border: none; border-bottom: 1.5px dashed var(--border); padding: 2px 4px; font-size: 13px; font-family: 'DM Sans', sans-serif; color: var(--espresso); width: 100%; outline: none; }
+        /* Editable */
+        .editable {
+            background: transparent;
+            border: none;
+            border-bottom: 1.5px dashed var(--border);
+            padding: 2px 4px;
+            font-size: 13px;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--espresso);
+            width: 100%;
+            outline: none;
+        }
         .editable:focus { border-color: var(--gold); background: var(--amber-light); border-radius: 4px; }
         select.editable { cursor: pointer; }
-        .map-container { background: white; border: 1px solid var(--border); border-radius: 14px; margin-bottom: 24px; overflow: hidden; box-shadow: var(--shadow); }
+        /* Mapa */
+        .map-container {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 24px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
         #map { height: 400px; width: 100%; z-index: 1; }
         .map-header { padding: 12px 20px; background: var(--cream-light); border-bottom: 1px solid var(--border); font-weight: 600; }
+        /* Funnel, fases, scripts, etc. */
         .funnel-item { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
         .funnel-label { width: 160px; font-size: 12px; color: var(--gray); text-align: right; }
         .funnel-track { flex: 1; height: 38px; background: #F0E8DC; border-radius: 8px; overflow: hidden; }
         .funnel-fill { height: 100%; border-radius: 8px; display: flex; align-items: center; padding-left: 14px; font-size: 12px; font-weight: 500; color: white; }
         .funnel-pct { width: 42px; font-size: 12px; font-weight: 600; color: var(--gray); }
-        .phase-card { background: white; border: 1px solid var(--border); border-radius: 14px; padding: 18px; position: relative; overflow: hidden; }
+        .phase-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+            position: relative;
+            overflow: hidden;
+        }
         .phase-num { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }
         .phase-name { font-size: 14px; font-weight: 600; color: var(--espresso); }
         .phase-period { font-size: 11px; color: var(--gray); margin-bottom: 10px; }
         .phase-goal { font-size: 12px; color: var(--caramel); font-weight: 500; }
-        .script-card { background: white; border: 1px solid var(--border); border-radius: 14px; margin-bottom: 14px; overflow: hidden; }
-        .script-header { padding: 12px 18px; background: var(--cream-light); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
-        .script-badge { background: var(--espresso); color: var(--gold); font-size: 10px; font-weight: 600; padding: 3px 10px; border-radius: 10px; }
+        .script-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+        .script-header {
+            padding: 12px 18px;
+            background: var(--cream-light);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .script-badge {
+            background: var(--espresso);
+            color: var(--gold);
+            font-size: 10px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 10px;
+        }
         .script-title { font-size: 13px; font-weight: 600; flex: 1; }
-        .script-body { padding: 16px 18px; background: #FDFAF6; font-size: 13px; line-height: 1.7; border-left: 3px solid var(--gold); font-style: italic; }
+        .script-body {
+            padding: 16px 18px;
+            background: #FDFAF6;
+            font-size: 13px;
+            line-height: 1.7;
+            border-left: 3px solid var(--gold);
+            font-style: italic;
+        }
         .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-bottom: 24px; }
-        .day-col { background: white; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-        .day-head { padding: 8px; text-align: center; font-size: 10px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: white; }
+        .day-col {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .day-head {
+            padding: 8px;
+            text-align: center;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            color: white;
+        }
         .day-head.lun { background: var(--espresso); }
         .day-head.mar { background: var(--brown); }
         .day-head.mie { background: var(--espresso); }
@@ -106,31 +328,114 @@
         .day-head.sab { background: var(--caramel); }
         .day-head.dom { background: var(--gold); color: var(--espresso); }
         .day-tasks { padding: 10px 8px; }
-        .day-task { display: flex; gap: 6px; align-items: flex-start; margin-bottom: 7px; font-size: 11px; }
-        .task-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+        .day-task {
+            display: flex;
+            gap: 6px;
+            align-items: flex-start;
+            margin-bottom: 7px;
+            font-size: 11px;
+        }
+        .task-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-top: 4px;
+        }
         .tools-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 24px; }
-        .tool-item { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
-        .tool-emoji-box { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; background: var(--mist); border: 1px solid var(--border); }
+        .tool-item {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .tool-emoji-box {
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            background: var(--mist);
+            border: 1px solid var(--border);
+        }
         .tool-name { font-size: 13px; font-weight: 600; }
         .tool-desc { font-size: 11px; color: var(--gray); margin-top: 2px; }
-        .tool-dept { margin-left: auto; font-size: 10px; padding: 3px 8px; border-radius: 8px; font-weight: 500; flex-shrink: 0; }
+        .tool-dept {
+            margin-left: auto;
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 8px;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
         .dept-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 24px; }
-        .dept-card { background: white; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
-        .dept-head-bar { padding: 14px 18px; color: white; display: flex; align-items: center; gap: 10px; }
+        .dept-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        .dept-head-bar {
+            padding: 14px 18px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
         .dept-head-bar h3 { font-size: 14px; font-weight: 600; }
         .dept-who { font-size: 11px; opacity: 0.8; }
         .dept-tasks { padding: 14px 18px; }
-        .dept-task-row { display: flex; align-items: flex-start; gap: 8px; padding: 5px 0; border-bottom: 1px solid #F5EDE0; font-size: 12px; }
+        .dept-task-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 5px 0;
+            border-bottom: 1px solid #F5EDE0;
+            font-size: 12px;
+        }
         .check { color: var(--green); font-weight: 600; }
         .inv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
-        .inv-card { background: white; border: 1px solid var(--border); border-radius: 14px; padding: 18px; text-align: center; }
+        .inv-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+            text-align: center;
+        }
         .inv-icon { font-size: 28px; margin-bottom: 8px; }
         .inv-value { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; }
-        .pagination { display: flex; justify-content: center; gap: 12px; margin-top: 16px; margin-bottom: 24px; }
-        .pagination button { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); background: white; cursor: pointer; }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 16px;
+            margin-bottom: 24px;
+        }
+        .pagination button {
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: white;
+            cursor: pointer;
+        }
         .pagination button:hover { background: var(--cream-light); }
+        /* Alertas */
         .alerts-container { margin-bottom: 20px; }
-        .alert-banner { background: #FFF3E0; border-left: 5px solid #F57C00; padding: 12px 18px; border-radius: 10px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; font-size: 13px; box-shadow: var(--shadow); }
+        .alert-banner {
+            background: #FFF3E0;
+            border-left: 5px solid #F57C00;
+            padding: 12px 18px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            box-shadow: var(--shadow);
+        }
         .alert-banner.warning { background: #FDEEEC; border-left-color: #D32F2F; }
         @media (max-width: 900px) {
             .sidebar { width: 60px; }
@@ -178,9 +483,12 @@
     <div class="content">
         <div id="alerts-container" class="alerts-container"></div>
 
-        <!-- DASHBOARD (contenido completo) -->
+        <!-- ==================== PANEL DASHBOARD ==================== -->
         <div id="panel-dashboard" class="panel active">
-            <div class="sec-header"><div><div class="sec-title">Resumen de la semana</div><div class="sec-subtitle">Actualiza los valores cada semana en la reunión del domingo</div></div><div style="font-size:12px;">Semana: <input type="week" id="week-selector"></div></div>
+            <div class="sec-header">
+                <div><div class="sec-title">Resumen de la semana</div><div class="sec-subtitle">Actualiza los valores cada semana en la reunión del domingo</div></div>
+                <div style="font-size:12px;">Semana: <input type="week" id="week-selector"></div>
+            </div>
             <div class="kpi-row">
                 <div class="kpi-card gold"><div class="kpi-label">Contactados WPP esta semana</div><div class="kpi-value" id="kpi1-val">0</div><div class="kpi-meta">Meta: 30 · <span id="kpi1-pct">0%</span></div><div class="kpi-bar"><div class="kpi-fill" id="kpi1-bar" style="width:0%"></div></div><div style="margin-top:10px"><input class="editable kpi-input" data-kpi="contactados" type="number" min="0" max="30" placeholder="Valor" oninput="updateKpiManual(this,30,'kpi1-val','kpi1-bar',document.getElementById('kpi1-pct'))"></div></div>
                 <div class="kpi-card green"><div class="kpi-label">Aliados activos acumulados</div><div class="kpi-value" id="kpi2-val">0</div><div class="kpi-meta">Meta: 10 · <span id="kpi2-pct">0%</span></div><div class="kpi-bar"><div class="kpi-fill" id="kpi2-bar" style="width:0%"></div></div><div style="margin-top:10px"><input class="editable kpi-input" data-kpi="aliados" type="number" min="0" max="10" placeholder="Valor" oninput="updateKpiManual(this,10,'kpi2-val','kpi2-bar',document.getElementById('kpi2-pct'))"></div></div>
@@ -188,19 +496,42 @@
                 <div class="kpi-card red"><div class="kpi-label">Unidades vendidas (mes)</div><div class="kpi-value" id="kpi4-val">0</div><div class="kpi-meta">Meta: 60 · <span id="kpi4-pct">0%</span></div><div class="kpi-bar"><div class="kpi-fill" id="kpi4-bar" style="width:0%"></div></div><div style="margin-top:10px"><input class="editable kpi-input" data-kpi="unidades" type="number" min="0" max="60" placeholder="Valor" oninput="updateKpiManual(this,60,'kpi4-val','kpi4-bar',document.getElementById('kpi4-pct'))"></div></div>
             </div>
             <div class="map-container"><div class="map-header">📍 Mapa de cafeterías contactadas (por estado)</div><div id="map"></div></div>
-            <div class="table-wrap"><div class="table-header"><h3>Embudo de conversión · Cafeterías sur Medellín</h3><span>Meta mes 1</span></div><div style="padding:20px 24px;"><!-- funnel estático --></div></div>
+            <div class="table-wrap"><div class="table-header"><h3>Embudo de conversión · Cafeterías sur Medellín</h3><span>Meta mes 1</span></div><div style="padding:20px 24px;">
+                <div class="funnel-item"><div class="funnel-label">Prospectos ARPA</div><div class="funnel-track"><div class="funnel-fill" style="width:100%;background:#1A0D04">120 cafeterías identificadas</div></div><div class="funnel-pct">100%</div></div>
+                <div class="funnel-item"><div class="funnel-label">Contactados WPP</div><div class="funnel-track"><div class="funnel-fill" style="width:83%;background:#3B1F0C">100 mensajes enviados</div></div><div class="funnel-pct">83%</div></div>
+                <div class="funnel-item"><div class="funnel-label">Respondieron</div><div class="funnel-track"><div class="funnel-fill" style="width:25%;background:#7C3F1E">25 respuestas</div></div><div class="funnel-pct">25%</div></div>
+                <div class="funnel-item"><div class="funnel-label">Visita realizada</div><div class="funnel-track"><div class="funnel-fill" style="width:15%;background:#C8973A;color:#1A0D04">15 visitas</div></div><div class="funnel-pct">15%</div></div>
+                <div class="funnel-item"><div class="funnel-label">Aliado activo</div><div class="funnel-track"><div class="funnel-fill" style="width:8%;background:#2D7A3A">10 aliados</div></div><div class="funnel-pct">8%</div></div>
+                <div class="funnel-item"><div class="funnel-label">Reorden mes 2</div><div class="funnel-track"><div class="funnel-fill" style="width:5%;background:#4CAF50">6 reórden</div></div><div class="funnel-pct">5%</div></div>
+            </div></div>
             <div class="table-wrap"><div class="table-header"><h3>Zonas prioritarias · Sur de Medellín</h3><span>Actualizar al cerrar nuevos aliados</span></div>
                 <table id="zonas-table"><thead><tr><th>Zona</th><th>Sectores clave</th><th>Prioridad</th><th>Identificadas</th><th>Aliados activos</th></tr></thead><tbody>
-                    <tr><td><strong>El Poblado</strong></td><td>Parques, Manila, La Frontera, Patio Bonito</td><td class="pill-red">Alta</td><td><input class="editable zone-identified" data-zone="El Poblado" type="number" value="0"></td><td><input class="editable zone-active" data-zone="El Poblado" type="number" value="0"></td></tr>
-                    <tr><td><strong>Envigado</strong></td><td>Centro, Loma del Escobero, El Dorado</td><td class="pill-red">Alta</td><td><input class="editable zone-identified" data-zone="Envigado" type="number" value="0"></td><td><input class="editable zone-active" data-zone="Envigado" type="number" value="0"></td></tr>
-                    <tr><td><strong>Laureles</strong></td><td>Estadio, Barrio Laureles</td><td class="pill-red">Alta</td><td><input class="editable zone-identified" data-zone="Laureles" type="number" value="0"></td>}<input class="editable zone-active" data-zone="Laureles" type="number" value="0"></td></tr>
-                    <tr><td><strong>Sabaneta</strong></td><td>Parque principal, zona industrial</td><td class="pill-gold">Media</td><td><input class="editable zone-identified" data-zone="Sabaneta" type="number" value="0"></td>}<input class="editable zone-active" data-zone="Sabaneta" type="number" value="0"></td></tr>
-                    <tr><td><strong>Itagüí</strong></td><td>Centro, La Gabriela, Ditaires</td><td class="pill-gold">Media</td><td><input class="editable zone-identified" data-zone="Itagüí" type="number" value="0"></td>}<input class="editable zone-active" data-zone="Itagüí" type="number" value="0"></td></tr>
-                </tbody></table>
+                    <tr><td><strong>El Poblado</strong></td><td>Parques, Manila, La Frontera, Patio Bonito</td><td class="pill-red">Alta</td>
+                    <td><input class="editable zone-identified" data-zone="El Poblado" type="number" value="0"></td>
+                    <td><input class="editable zone-active" data-zone="El Poblado" type="number" value="0"></td>
+                </tr>
+                <tr><td><strong>Envigado</strong></td><td>Centro, Loma del Escobero, El Dorado</td><td class="pill-red">Alta</td>
+                    <td><input class="editable zone-identified" data-zone="Envigado" type="number" value="0"></td>
+                    <td><input class="editable zone-active" data-zone="Envigado" type="number" value="0"></td>
+                </tr>
+                <tr><td><strong>Laureles</strong></td><td>Estadio, Barrio Laureles</td><td class="pill-red">Alta</td>
+                    <td><input class="editable zone-identified" data-zone="Laureles" type="number" value="0"></td>
+                    <td><input class="editable zone-active" data-zone="Laureles" type="number" value="0"></td>
+                </tr>
+                <tr>}<strong>Sabaneta</strong></td><td>Parque principal, zona industrial</td><td class="pill-gold">Media</td>
+                    <td><input class="editable zone-identified" data-zone="Sabaneta" type="number" value="0"></td>
+                    <td><input class="editable zone-active" data-zone="Sabaneta" type="number" value="0"></td>
+                </tr>
+                <tr>}<strong>Itagüí</strong></td><td>Centro, La Gabriela, Ditaires</td><td class="pill-gold">Media</td>
+                    <td><input class="editable zone-identified" data-zone="Itagüí" type="number" value="0"></td>
+                    <td><input class="editable zone-active" data-zone="Itagüí" type="number" value="0"></td>
+                </tr>
+                </tbody>
+            </table>
             </div>
         </div>
 
-        <!-- PIPELINE -->
+        <!-- ==================== PANEL PIPELINE ==================== -->
         <div id="panel-pipeline" class="panel">
             <div class="sec-header"><div><div class="sec-title">Pipeline de Prospectos</div><div class="sec-subtitle">Registra cada cafetería contactada · Actualiza el estado después de cada interacción</div></div><button class="btn btn-primary" onclick="addRow()">+ Agregar fila</button></div>
             <div class="note"><strong>Cómo usar:</strong> Completa de izquierda a derecha. El estado cambia con cada acción. Un prospecto tarda en promedio 2 semanas en convertirse en aliado activo.</div>
@@ -208,15 +539,200 @@
             <div class="pagination"><button id="prev-page" disabled>◀ Anterior</button><span id="page-info">Página 1</span><button id="next-page">Siguiente ▶</button></div>
         </div>
 
-        <!-- INVENTARIO, CALENDARIO, CONTENIDO, SCRIPTS, FASES, EQUIPO, HERRAMIENTAS, PROTOCOLO VISITA (contenido completo, omitido por brevedad pero funcional) -->
-        <div id="panel-inventario" class="panel">...</div>
-        <div id="panel-calendario" class="panel">...</div>
-        <div id="panel-contenido" class="panel">...</div>
-        <div id="panel-scripts" class="panel">...</div>
-        <div id="panel-fases" class="panel">...</div>
-        <div id="panel-equipo" class="panel">...</div>
-        <div id="panel-herramientas" class="panel">...</div>
-        <div id="panel-visita" class="panel">...</div>
+        <!-- ==================== PANEL INVENTARIO ==================== -->
+        <div id="panel-inventario" class="panel">
+            <div class="sec-header"><div><div class="sec-title">Inventario y Consignaciones</div><div class="sec-subtitle">Controla el stock y los cobros de cada aliado activo</div></div></div>
+            <div class="inv-grid">
+                <div class="inv-card"><div class="inv-icon">📦</div><div class="inv-value"><input class="editable" id="inv250" type="number" value="0" style="width:80px;text-align:center;font-size:26px;"></div><div class="inv-label">Unidades 250g disponibles</div></div>
+                <div class="inv-card"><div class="inv-icon">📦</div><div class="inv-value"><input class="editable" id="inv500" type="number" value="0" style="width:80px;text-align:center;font-size:26px;"></div><div class="inv-label">Unidades 500g disponibles</div></div>
+                <div class="inv-card"><div class="inv-icon">💰</div><div class="inv-value" style="color:var(--green);font-size:20px;">$<input class="editable" id="invPendiente" type="number" value="0" style="width:100px;font-size:20px;"></div><div class="inv-label">Pendiente por cobrar (COP)</div></div>
+            </div>
+            <div class="table-wrap"><div class="table-header"><h3>Registro de consignaciones</h3><span>Actualizar después de cada visita de revisión</span></div><div style="overflow-x:auto;"><table id="consignaciones-table"><thead><tr><th>#</th><th>Cafetería</th><th>Zona</th><th>Fecha entrega</th><th>250g entregados</th><th>500g entregados</th><th>Vendidos</th><th>Pendiente COP</th><th>Próx. revisión</th><th>Estado pago</th><th>Notas</th></tr></thead><tbody>
+                <tr><td>1</td>
+                <td><input class="editable" placeholder="Cafetería..."></td>
+                <td><input class="editable" placeholder="Zona..."></td>
+                <td><input class="editable" type="date"></td>
+                <td><input class="editable" type="number" value="0"></td>
+                <td><input class="editable" type="number" value="0"></td>
+                <td><input class="editable" type="number" value="0"></td>
+                <td><input class="editable" placeholder="$0"></td>
+                <td><input class="editable" type="date"></td>
+                <td><select class="editable"><option>Pendiente</option><option>Pagado</option></select></td>
+                <td><input class="editable" placeholder="Notas..."></td>
+            </tr>
+            <tr><td>2</td>
+                <td><input class="editable" placeholder="Cafetería..."></td>
+                <td><input class="editable" placeholder="Zona..."></td>
+                <td><input class="editable" type="date"></td>
+                <td><input class="editable" type="number" value="0"></td>
+                <td><input class="editable" type="number" value="0"></td>
+                <td><input class="editable" type="number" value="0"></td>
+                <td><input class="editable" placeholder="$0"></td>
+                <td><input class="editable" type="date"></td>
+                <td><select class="editable"><option>Pendiente</option><option>Pagado</option></select></td>
+                <td><input class="editable" placeholder="Notas..."></td>
+            </tr>
+            <tr><td>3</td>
+                <td><input class="editable" placeholder="Cafetería..."></td>
+                <td><input class="editable" placeholder="Zona..."></td>
+                <td><input class="editable" type="date"></td>
+                <td><input class="editable" type="number" value="0"></td>
+                <td><input class="editable" type="number" value="0"></td>
+                <td><input class="editable" type="number" value="0"></td>
+                <td><input class="editable" placeholder="$0"></td>
+                <td><input class="editable" type="date"></td>
+                <td><select class="editable"><option>Pendiente</option><option>Pagado</option></select></td>
+                <td><input class="editable" placeholder="Notas..."></td>
+            </tr>
+            </tbody></table></div></div>
+        </div>
+
+        <!-- ==================== PANEL CALENDARIO (semana tipo + seguimiento) ==================== -->
+        <div id="panel-calendario" class="panel">
+            <div class="sec-header"><div><div class="sec-title">Semana Tipo · Operaciones</div><div class="sec-subtitle">2 personas · máxima eficiencia · Persona A = Comercial · Persona B = Marketing</div></div></div>
+            <div class="week-grid">
+                <div class="day-col"><div class="day-head lun">Lunes</div><div class="day-tasks"><div class="day-task"><div class="task-dot" style="background:#C8973A"></div><span>Extraer 30 prospectos con ARPA</span></div><div class="day-task"><div class="task-dot" style="background:#1B5EA0"></div><span>Cargar en tracker</span></div><div class="day-task"><div class="task-dot" style="background:#2D7A3A"></div><span>Enviar 15 mensajes WPP · Persona A</span></div><div class="day-task"><div class="task-dot" style="background:#7C3F1E"></div><span>Planificar contenido semana · B</span></div></div></div>
+                <div class="day-col"><div class="day-head mar">Martes</div><div class="day-tasks"><div class="day-task"><div class="task-dot" style="background:#C8973A"></div><span>Enviar 15 WPP restantes · A</span></div><div class="day-task"><div class="task-dot" style="background:#2D7A3A"></div><span>Responder interesados del lunes</span></div><div class="day-task"><div class="task-dot" style="background:#1B5EA0"></div><span>Grabar reel en aliado · B</span></div><div class="day-task"><div class="task-dot" style="background:#7C3F1E"></div><span>Publicar story producto</span></div></div></div>
+                <div class="day-col"><div class="day-head mie">Miércoles</div><div class="day-tasks"><div class="day-task"><div class="task-dot" style="background:#C8973A"></div><span>Visitas a 2 cafeterías · A</span></div><div class="day-task"><div class="task-dot" style="background:#2D7A3A"></div><span>Revisar stock aliados activos</span></div><div class="day-task"><div class="task-dot" style="background:#1B5EA0"></div><span>Publicar reel + stories · B</span></div><div class="day-task"><div class="task-dot" style="background:#7C3F1E"></div><span>Actualizar tracker</span></div></div></div>
+                <div class="day-col"><div class="day-head jue">Jueves</div><div class="day-tasks"><div class="day-task"><div class="task-dot" style="background:#C8973A"></div><span>Seguimiento prospectos fríos · A</span></div><div class="day-task"><div class="task-dot" style="background:#2D7A3A"></div><span>Grabar B-roll café · B</span></div><div class="day-task"><div class="task-dot" style="background:#1B5EA0"></div><span>Responder DMs IG · B</span></div><div class="day-task"><div class="task-dot" style="background:#7C3F1E"></div><span>Actualizar KPIs semana</span></div></div></div>
+                <div class="day-col"><div class="day-head vie">Viernes</div><div class="day-tasks"><div class="day-task"><div class="task-dot" style="background:#C8973A"></div><span>1 visita cierre + entrega · A</span></div><div class="day-task"><div class="task-dot" style="background:#1B5EA0"></div><span>Publicar reel etiquetando aliado · B</span></div><div class="day-task"><div class="task-dot" style="background:#2D7A3A"></div><span>Foto producto en cafetería</span></div><div class="day-task"><div class="task-dot" style="background:#7C3F1E"></div><span>Registrar consignación</span></div></div></div>
+                <div class="day-col"><div class="day-head sab">Sábado</div><div class="day-tasks"><div class="day-task"><div class="task-dot" style="background:#C8973A"></div><span>Publicar reel / story · B</span></div><div class="day-task"><div class="task-dot" style="background:#2D7A3A"></div><span>Responder comentarios IG</span></div><div class="day-task"><div class="task-dot" style="background:#1B5EA0"></div><span>Editar reel siguiente semana</span></div><div class="day-task"><div class="task-dot" style="background:#7C3F1E"></div><span>Confirmar visitas semana siguiente</span></div></div></div>
+                <div class="day-col"><div class="day-head dom">Domingo</div><div class="day-tasks"><div class="day-task"><div class="task-dot" style="background:#1A0D04"></div><span>Reunión 30 min (A+B)</span></div><div class="day-task"><div class="task-dot" style="background:#1A0D04"></div><span>Revisar KPIs semana</span></div><div class="day-task"><div class="task-dot" style="background:#1A0D04"></div><span>Preparar mensajes lunes</span></div><div class="day-task"><div class="task-dot" style="background:#1A0D04"></div><span>Planear zonas semana nueva</span></div></div></div>
+            </div>
+            <div class="table-wrap"><div class="table-header"><h3>Registro semanal · Objetivos y cumplimiento</h3><span>Llenar cada domingo</span></div>
+                <table id="seguimiento-semanal"><thead><tr><th>#</th><th>Objetivo</th><th>Responsable</th><th>Meta</th><th>Real</th><th>Estado</th><th>Notas</th></tr></thead>
+                <tbody>
+                    <tr><td>1</td>\n                    <td>Prospectos contactados WPP</td>\n                    <td>A</td>\n                    <td>30</td>\n                    <td><input class="editable" type="number" placeholder="0"></td>\n                    <td><select class="editable"><option>Pendiente</option><option>En curso</option><option>Cumplido</option><option>No cumplido</option></select></td>\n                    <td><input class="editable" placeholder="Observación..."></td>\n                </tr>
+                    <tr><td>2</td>\n                    <td>Visitas a cafeterías</td>\n                    <td>A</td>\n                    <td>3</td>\n                    <td><input class="editable" type="number" placeholder="0"></td>\n                    <td><select class="editable"><option>Pendiente</option><option>En curso</option><option>Cumplido</option><option>No cumplido</option></select></td>\n                    <td><input class="editable" placeholder="Observación..."></td>\n                </tr>
+                    <tr><td>3</td>\n                    <td>Aliados nuevos cerrados</td>\n                    <td>A</td>\n                    <td>2</td>\n                    <td><input class="editable" type="number" placeholder="0"></td>\n                    <td><select class="editable"><option>Pendiente</option><option>En curso</option><option>Cumplido</option><option>No cumplido</option></select></td>\n                    <td><input class="editable" placeholder="Observación..."></td>\n                </tr>
+                    <tr><td>4</td>\n                    <td>Reels publicados</td>\n                    <td>B</td>\n                    <td>3</td>\n                    <td><input class="editable" type="number" placeholder="0"></td>\n                    <td><select class="editable"><option>Pendiente</option><option>En curso</option><option>Cumplido</option><option>No cumplido</option></select></td>\n                    <td><input class="editable" placeholder="Observación..."></td>\n                </tr>
+                </tbody>
+            </table>
+            </div>
+        </div>
+
+        <!-- ==================== PANEL CONTENIDO IG ==================== -->
+        <div id="panel-contenido" class="panel">
+            <div class="sec-header"><div><div class="sec-title">Plan de Contenido · Instagram</div><div class="sec-subtitle">3 reels/semana · etiquetando siempre a los aliados · Responsable: Persona B</div></div></div>
+            <div class="table-wrap"><div class="table-header"><h3>Calendario de publicaciones · Mes en curso</h3><span>Actualizar métricas después de publicar</span></div><div style="overflow-x:auto;"><table id="calendario-contenido"><thead><tr><th>Sem.</th><th>Día</th><th>Fecha</th><th>Tipo</th><th>Cafetería etiquetada</th><th>Concepto / Idea</th><th>Estado</th><th>Alcance</th><th>Engagement %</th></tr></thead><tbody>
+                <tr><td>1</td>\n                    <td>Martes</td>\n                    <td><input class="editable" type="date"></td>\n                    <td><select class="editable"><option>Reel</option><option>Story</option><option>Post</option></select></td>\n                    <td><input class="editable" placeholder="Cafetería..."></td>\n                    <td><input class="editable" placeholder="Proceso de preparación..."></td>\n                    <td><select class="editable"><option>Pendiente</option><option>Grabado</option><option>Editado</option><option>Publicado</option></select></td>\n                    <td><input class="editable" type="number" placeholder="0"></td>\n                    <td><input class="editable" placeholder="0%"></td>\n                </tr>
+                <tr><td>1</td>\n                    <td>Viernes</td>\n                    <td><input class="editable" type="date"></td>\n                    <td><select class="editable"><option>Reel</option><option>Story</option><option>Post</option></select></td>\n                    <td><input class="editable" placeholder="Cafetería..."></td>\n                    <td><input class="editable" placeholder="Historia de origen..."></td>\n                    <td><select class="editable"><option>Pendiente</option><option>Grabado</option><option>Editado</option><option>Publicado</option></select></td>\n                    <td><input class="editable" type="number" placeholder="0"></td>\n                    <td><input class="editable" placeholder="0%"></td>\n                </tr>
+                <tr><td>1</td>\n                    <td>Sábado</td>\n                    <td><input class="editable" type="date"></td>\n                    <td><select class="editable"><option>Reel</option><option>Story</option><option>Post</option></select></td>\n                    <td><input class="editable" placeholder="Cafetería..."></td>\n                    <td><input class="editable" placeholder="Aliado nuevo presentación..."></td>\n                    <td><select class="editable"><option>Pendiente</option><option>Grabado</option><option>Editado</option><option>Publicado</option></select></td>\n                    <td><input class="editable" type="number" placeholder="0"></td>\n                    <td><input class="editable" placeholder="0%"></td>\n                </tr>
+                <tr><td>2</td>\n                    <td>Martes</td>\n                    <td><input class="editable" type="date"></td>\n                    <td><select class="editable"><option>Reel</option><option>Story</option><option>Post</option></select></td>\n                    <td><input class="editable" placeholder="Cafetería..."></td>\n                    <td><input class="editable" placeholder="250g vs 500g comparación..."></td>\n                    <td><select class="editable"><option>Pendiente</option><option>Grabado</option><option>Editado</option><option>Publicado</option></select></td>\n                    <td><input class="editable" type="number" placeholder="0"></td>\n                    <td><input class="editable" placeholder="0%"></td>\n                </tr>
+                </tbody>
+            </table></div></div>
+            <div class="note"><strong>Hashtags base PAOS:</strong> #cafécolombia #cafeespecialidad #specialtycoffee #cafemedellin #medellincoffee #paoscafe #caficultura #coffeelovers #baristalife #cafeteriamedellin #antioquia #colombiancoffee</div>
+        </div>
+
+        <!-- ==================== PANEL SCRIPTS WPP ==================== -->
+        <div id="panel-scripts" class="panel">
+            <div class="sec-header"><div><div class="sec-title">Scripts de WhatsApp</div><div class="sec-subtitle">Copia, personaliza y envía · El nombre y la zona van entre corchetes</div></div></div>
+            <div class="note"><strong>Consejo:</strong> Personaliza siempre con el nombre de la cafetería y la zona. Un mensaje personalizado triplica la tasa de respuesta.</div>
+            <div class="script-card"><div class="script-header"><span class="script-badge">Script 1</span><span class="script-title">Primer contacto frío</span></div><div class="script-body">"Hola [Nombre], ¿cómo estás? Te escribo de PAOS, una marca de café colombiano de especialidad. Estamos trabajando con cafeterías de [zona] para llevarles café de alta calidad en presentaciones de 250g y 500g. ¿Tienen un momentico para contarles cómo funciona nuestra alianza? Sin compromiso 🙌☕"</div></div>
+            <div class="script-card"><div class="script-header"><span class="script-badge">Script 2</span><span class="script-title">Seguimiento 24 horas · sin respuesta</span></div><div class="script-body">"Hola [Nombre], te vuelvo a escribir de PAOS ☕. Ayer te mandé un mensaje sobre nuestra propuesta de café de especialidad. ¿Pudiste verlo? La idea es ofrecerte producto en consignación para que no tengas ningún riesgo. ¿Tienes 5 minutos esta semana para que te cuente?"</div></div>
+            <div class="script-card"><div class="script-header"><span class="script-badge">Script 3</span><span class="script-title">Confirmación de visita</span></div><div class="script-body">"Perfecto [Nombre], ¡qué buena! Entonces quedamos el [día] a las [hora] en [nombre cafetería]. Voy a llevarles una muestra del café para que lo puedan probar. ¡Muchas gracias por el espacio! 🙏"</div></div>
+            <div class="script-card"><div class="script-header"><span class="script-badge">Script 4</span><span class="script-title">Seguimiento post-visita · 48h después</span></div><div class="script-body">"Hola [Nombre], fue un placer visitarlos el [día]. ¿Tuvieron la oportunidad de probar el café? Me gustaría saber qué les pareció y resolver cualquier duda que tengan para formalizar la alianza ☕"</div></div>
+            <div class="script-card"><div class="script-header"><span class="script-badge">Script 5</span><span class="script-title">Revisión de stock · aliado activo</span></div><div class="script-body">"Hola [Nombre], ¿cómo va la rotación del PAOS? Quería saber si necesitan restock o si tienen alguna novedad. Estoy por [zona] esta semana y si necesitan paso por allá sin problema 🙌"</div></div>
+            <div class="script-card"><div class="script-header"><span class="script-badge">Script 6</span><span class="script-title">Oferta de materia prima · aliado nivel 2</span></div><div class="script-body">"Hola [Nombre], quería contarles que además del café empacado, también ofrecemos el servicio de aprovisionamiento de materia prima para cafeterías. Podemos ser su aliado estratégico en el suministro de café de especialidad. ¿Les interesa que les cuente cómo funciona? ☕"</div></div>
+        </div>
+
+        <!-- ==================== PANEL 4 FASES ==================== -->
+        <div id="panel-fases" class="panel">
+            <div class="sec-header"><div><div class="sec-title">Plan de Activación · 4 Fases</div><div class="sec-subtitle">Hoja de ruta de 3 meses para PAOS en el sur de Medellín</div></div></div>
+            <div class="phases">
+                <div class="phase-card" data-phase="1"><div class="phase-num">Fase 1 · Semanas 1-2</div><div class="phase-name">Prospección</div><div class="phase-period">Duración: 2 semanas</div><div class="phase-goal">Meta: 60 cafeterías contactadas, 6 visitas agendadas</div><ul><li>Extraer datos con ARPA</li><li>Segmentar por zona sur</li><li>Cargar en tracker Sheets</li><li>30 mensajes WPP/semana</li></ul></div>
+                <div class="phase-card" data-phase="2"><div class="phase-num">Fase 2 · Semanas 3-4</div><div class="phase-name">Activación</div><div class="phase-period">Duración: 2 semanas</div><div class="phase-goal">Meta: 10 aliados activos al mes 1</div><ul><li>3 visitas/semana con kit</li><li>Protocolo en 4 pasos</li><li>Consignación sin riesgo</li><li>Reel por aliado (72h)</li></ul></div>
+                <div class="phase-card" data-phase="3"><div class="phase-num">Fase 3 · Mes 2</div><div class="phase-name">Fidelización</div><div class="phase-period">Duración: 1 mes</div><div class="phase-goal">Meta: 70% aliados con reorden</div><ul><li>Visita c/15 días</li><li>Oferta materia prima</li><li>Reseña Google Maps</li><li>Co-crear contenido</li></ul></div>
+                <div class="phase-card" data-phase="4"><div class="phase-num">Fase 4 · Mes 3+</div><div class="phase-name">Escala</div><div class="phase-period">Continuo</div><div class="phase-goal">Meta: 30 aliados, 200 unidades/mes</div><ul><li>Nuevas zonas: Belén, Centro</li><li>Programa de aliados</li><li>Ferias de café</li><li>Canal B2C IG/WPP</li></ul></div>
+            </div>
+            <div class="table-wrap"><div class="table-header"><h3>Protocolo de visita · 4 pasos</h3><span>Aplicar en cada cafetería</span></div>
+                <table><thead><tr><th>Paso</th><th>Nombre</th><th>Duración</th><th>Qué hacer</th><th>Qué NO hacer</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>PREP</strong></td>\n                    <td>Preparación</td>\n                    <td>24h antes</td>\n                    <td>Ver IG cafetería · Kit físico: muestra 250g, ficha técnica, propuesta</td>\n                    <td>Llegar sin investigar al aliado</td>\n                </tr>
+                    <tr><td><strong>1</strong></td>\n                    <td>Apertura</td>\n                    <td>2 min</td>\n                    <td>"¿Qué perfil de cliente viene?" · "¿De dónde consigues el café?" · Escuchar</td>\n                    <td>Vender de entrada</td>\n                </tr>
+                    <tr><td><strong>2</strong></td>\n                    <td>Presentación</td>\n                    <td>5 min</td>\n                    <td>Mostrar empaque físico · Origen, variedad, proceso · Notas de cata</td>\n                    <td>Leer el brochure en voz alta</td>\n                </tr>
+                    <tr><td><strong>3</strong></td>\n                    <td>Cata</td>\n                    <td>5-10 min</td>\n                    <td>Ofrecer preparar una taza · Si no hay tiempo, dejar muestra 250g</td>\n                    <td>No dejar muestra si dicen que no</td>\n                </tr>
+                    <tr><td><strong>4</strong></td>\n                    <td>Cierre</td>\n                    <td>3 min</td>\n                    <td>"No pagas hasta que vendas · Si no rota en 15 días lo recojo" · Registrar en Sheets</td>\n                    <td>Irse sin registrar la consignación</td>\n                </tr>
+                </tbody>
+            </table>
+            </div>
+        </div>
+
+        <!-- ==================== PANEL EQUIPO ==================== -->
+        <div id="panel-equipo" class="panel">
+            <div class="sec-header"><div><div class="sec-title">Estructura del Equipo</div><div class="sec-subtitle">2 personas · 4 departamentos · roles claros</div></div></div>
+            <div class="dept-grid">
+                <div class="dept-card"><div class="dept-head-bar" style="background:var(--espresso)"><span style="font-size:20px">🎯</span><div><h3>Comercial & Ventas</h3><div class="dept-who">Persona A · rol principal</div></div></div><div class="dept-tasks"><div class="dept-task-row"><span class="check">✓</span><span>Prospección con ARPA (30 contactos/semana)</span></div><div class="dept-task-row"><span class="check">✓</span><span>Envío mensajes WhatsApp Business</span></div><div class="dept-task-row"><span class="check">✓</span><span>Agendamiento y realización de visitas (3/sem)</span></div><div class="dept-task-row"><span class="check">✓</span><span>Cierre de alianzas y entrega de producto</span></div><div class="dept-task-row"><span class="check">✓</span><span>Revisión de stock en aliados (c/15 días)</span></div><div class="dept-task-row"><span class="check">✓</span><span>Gestión de consignaciones y cobros</span></div></div></div>
+                <div class="dept-card"><div class="dept-head-bar" style="background:#2D7A3A"><span style="font-size:20px">🎬</span><div><h3>Marketing & Contenido</h3><div class="dept-who">Persona B · rol principal</div></div></div><div class="dept-tasks"><div class="dept-task-row"><span class="check">✓</span><span>Grabación y edición de Reels (CapCut)</span></div><div class="dept-task-row"><span class="check">✓</span><span>Diseño de piezas gráficas (Canva Pro)</span></div><div class="dept-task-row"><span class="check">✓</span><span>Programación contenido (Meta Business Suite)</span></div><div class="dept-task-row"><span class="check">✓</span><span>Respuesta a DMs y comentarios IG</span></div><div class="dept-task-row"><span class="check">✓</span><span>Análisis métricas semanales</span></div><div class="dept-task-row"><span class="check">✓</span><span>Dashboard KPIs Looker Studio</span></div></div></div>
+                <div class="dept-card"><div class="dept-head-bar" style="background:#1B5EA0"><span style="font-size:20px">⚙️</span><div><h3>Operaciones</h3><div class="dept-who">Ambos · revisión conjunta dom.</div></div></div><div class="dept-tasks"><div class="dept-task-row"><span class="check">✓</span><span>Control de stock 250g y 500g</span></div><div class="dept-task-row"><span class="check">✓</span><span>Tracker Google Sheets actualizado</span></div><div class="dept-task-row"><span class="check">✓</span><span>Logística de entregas y recogidas</span></div><div class="dept-task-row"><span class="check">✓</span><span>Gestión de consignaciones activas</span></div><div class="dept-task-row"><span class="check">✓</span><span>Planificación semanal (reunión domingo)</span></div><div class="dept-task-row"><span class="check">✓</span><span>Ajuste de mensajes y estrategia WPP</span></div></div></div>
+                <div class="dept-card"><div class="dept-head-bar" style="background:var(--caramel)"><span style="font-size:20px">📈</span><div><h3>Data & Análisis</h3><div class="dept-who">Persona B · domingos</div></div></div><div class="dept-tasks"><div class="dept-task-row"><span class="check">✓</span><span>Revisión KPIs semanales</span></div><div class="dept-task-row"><span class="check">✓</span><span>Análisis tasa de conversión</span></div><div class="dept-task-row"><span class="check">✓</span><span>Ajuste de scripts WPP según resultados</span></div><div class="dept-task-row"><span class="check">✓</span><span>Dashboard en Looker Studio</span></div><div class="dept-task-row"><span class="check">✓</span><span>Reporte mensual consolidado</span></div><div class="dept-task-row"><span class="check">✓</span><span>Análisis de contenido que mejor rotó</span></div></div></div>
+            </div>
+            <div class="table-wrap"><div class="table-header"><h3>Agenda reunión semanal · Domingos 30 minutos</h3></div>
+                <table><thead><tr><th>Tiempo</th><th>Tema</th><th>Quién lidera</th><th>Output esperado</th></tr></thead>
+                <tbody>
+                    <tr><td>0-5 min</td>\n                    <td>Revisión KPIs semana que termina</td>\n                    <td>B</td>\n                    <td>Números reales vs meta</td>\n                </tr>
+                    <tr><td>5-10 min</td>\n                    <td>¿Qué funcionó? ¿Qué no?</td>\n                    <td>Ambos</td>\n                    <td>Aprendizajes concretos</td>\n                </tr>
+                    <tr><td>10-15 min</td>\n                    <td>Ajuste de mensaje WPP si es necesario</td>\n                    <td>A</td>\n                    <td>Nuevo script o confirmación del actual</td>\n                </tr>
+                    <tr><td>15-20 min</td>\n                    <td>Planificación zonas y visitas semana nueva</td>\n                    <td>A</td>\n                    <td>Lista de cafeterías a visitar</td>\n                </tr>
+                    <tr><td>20-25 min</td>\n                    <td>Plan de contenido IG semana nueva</td>\n                    <td>B</td>\n                    <td>3 reels + cafeterías a etiquetar</td>\n                </tr>
+                    <tr><td>25-30 min</td>\n                    <td>Revisión stock y consignaciones pendientes</td>\n                    <td>Ambos</td>\n                    <td>Aliados a visitar urgente</td>\n                </tr>
+                </tbody>
+            </table>
+            </div>
+        </div>
+
+        <!-- ==================== PANEL HERRAMIENTAS ==================== -->
+        <div id="panel-herramientas" class="panel">
+            <div class="sec-header"><div><div class="sec-title">Stack de Herramientas</div><div class="sec-subtitle">Todo lo que necesita el equipo PAOS · Mayormente gratuito</div></div></div>
+            <div class="tools-grid">
+                <div class="tool-item"><div class="tool-emoji-box">🔍</div><div><div class="tool-name">ARPA</div><div class="tool-desc">Extracción de prospectos desde motores de búsqueda · Uso: cada lunes</div></div><span class="tool-dept" style="background:var(--amber-light);color:#7A5A0A">Comercial</span></div>
+                <div class="tool-item"><div class="tool-emoji-box">📱</div><div><div class="tool-name">WhatsApp Business</div><div class="tool-desc">Contacto B2B con respuestas rápidas configuradas · 30 mensajes/semana</div></div><span class="tool-dept" style="background:var(--amber-light);color:#7A5A0A">Comercial</span></div>
+                <div class="tool-item"><div class="tool-emoji-box">📊</div><div><div class="tool-name">Google Sheets</div><div class="tool-desc">Tracker prospectos, KPIs, inventario · Actualización diaria</div></div><span class="tool-dept" style="background:var(--blue-light);color:var(--blue)">Operaciones</span></div>
+                <div class="tool-item"><div class="tool-emoji-box">📋</div><div><div class="tool-name">Trello</div><div class="tool-desc">Pipeline visual: frío → tibio → visita → aliado · Alternativa al Sheets</div></div><span class="tool-dept" style="background:var(--blue-light);color:var(--blue)">Operaciones</span></div>
+                <div class="tool-item"><div class="tool-emoji-box">🎬</div><div><div class="tool-name">CapCut</div><div class="tool-desc">Edición de Reels con subtítulos automáticos y plantillas · Gratuito</div></div><span class="tool-dept" style="background:var(--green-light);color:var(--green)">Marketing</span></div>
+                <div class="tool-item"><div class="tool-emoji-box">🎨</div><div><div class="tool-name">Canva Pro</div><div class="tool-desc">Piezas gráficas, stories, catálogo de producto · ~$13/mes</div></div><span class="tool-dept" style="background:var(--green-light);color:var(--green)">Marketing</span></div>
+                <div class="tool-item"><div class="tool-emoji-box">📅</div><div><div class="tool-name">Meta Business Suite</div><div class="tool-desc">Programar publicaciones IG y ver métricas · Gratuito</div></div><span class="tool-dept" style="background:var(--green-light);color:var(--green)">Marketing</span></div>
+                <div class="tool-item"><div class="tool-emoji-box">📝</div><div><div class="tool-name">Notion</div><div class="tool-desc">Wiki interna, scripts WPP, notas de visita · Gratuito</div></div><span class="tool-dept" style="background:var(--blue-light);color:var(--blue)">Operaciones</span></div>
+                <div class="tool-item"><div class="tool-emoji-box">📍</div><div><div class="tool-name">Google My Business</div><div class="tool-desc">Perfil PAOS en Google Maps Medellín · Gratuito</div></div><span class="tool-dept" style="background:var(--green-light);color:var(--green)">Marketing</span></div>
+                <div class="tool-item"><div class="tool-emoji-box">📈</div><div><div class="tool-name">Google Looker Studio</div><div class="tool-desc">Dashboard visual de KPIs conectado a Sheets · Gratuito</div></div><span class="tool-dept" style="background:var(--red-light);color:var(--red)">Data</span></div>
+            </div>
+            <div class="note"><strong>Costo total del stack:</strong> Solo Canva Pro tiene costo (~$13/mes). El resto es 100% gratuito.</div>
+        </div>
+
+        <!-- ==================== PANEL PROTOCOLO VISITA ==================== -->
+        <div id="panel-visita" class="panel">
+            <div class="sec-header"><div><div class="sec-title">Protocolo de Visita y Alianza</div><div class="sec-subtitle">Guía completa para convertir una cafetería en aliado activo PAOS</div></div></div>
+            <div class="kpi-row">
+                <div class="kpi-card gold"><div class="kpi-label">Duración promedio visita</div><div class="kpi-value" style="color:var(--caramel)">20</div><div class="kpi-meta">Minutos · máximo 25</div></div>
+                <div class="kpi-card green"><div class="kpi-label">Conversión meta</div><div class="kpi-value" style="color:var(--green)">33%</div><div class="kpi-meta">1 de 3 visitas = aliado</div></div>
+                <div class="kpi-card blue"><div class="kpi-label">Plazo consignación</div><div class="kpi-value" style="color:var(--blue)">30</div><div class="kpi-meta">Días · revisión c/15</div></div>
+                <div class="kpi-card red"><div class="kpi-label">Seguimiento post-visita</div><div class="kpi-value" style="color:var(--red)">48h</div><div class="kpi-meta">Máximo para escribir</div></div>
+            </div>
+            <div class="table-wrap"><div class="table-header"><h3>Contenido del kit físico de visita</h3><span>Llevar siempre</span></div>
+                <table><thead><tr><th>Item</th><th>Descripción</th><th>¿Siempre?</th></tr></thead>
+                <tbody>
+                    <tr><td>☕ Muestra 250g</td>\n                    <td>Empaque sellado con etiqueta PAOS · para dejar en la cafetería</td>\n                    <td><span class="status-pill pill-green">Siempre</span></td>\n                </tr>
+                    <tr><td>📄 Ficha técnica</td>\n                    <td>Origen, variedad, proceso, notas de cata del café</td>\n                    <td><span class="status-pill pill-green">Siempre</span></td>\n                </tr>
+                    <tr><td>📋 Propuesta alianza</td>\n                    <td>PDF o impresa · términos de consignación 30 días</td>\n                    <td><span class="status-pill pill-green">Siempre</span></td>\n                </tr>
+                    <tr><td>📦 Muestra 500g</td>\n                    <td>Para mostrar el empaque de mayor presentación</td>\n                    <td><span class="status-pill pill-gold">Recomendado</span></td>\n                </tr>
+                    <tr><td>📷 Teléfono cargado</td>\n                    <td>Para tomar foto del producto en el local y el reel</td>\n                    <td><span class="status-pill pill-green">Siempre</span></td>\n                </tr>
+                </tbody>
+            </table>
+            </div>
+            <div class="table-wrap"><div class="table-header"><h3>Términos del modelo de alianza · Consignación</h3></div>
+                <tr><thead><tr><th>Condición</th><th>Detalle</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>Pago anticipado</strong></td>\n                    <td>No aplica · el aliado solo paga lo que venda</td>\n                </tr>
+                    <tr><td><strong>Plazo de venta</strong></td>\n                    <td>30 días desde la entrega</td>\n                </td>
+                    <tr><td><strong>Revisión de stock</strong></td>\n                    <td>Visita presencial cada 15 días</td>\n                </tr>
+                    <tr><td><strong>Devolución</strong></td>\n                    <td>Gratuita si no rota en 30 días · sin costo para el aliado</td>\n                </tr>
+                    <tr><td><strong>Nivel 2 · Materia prima</strong></td>\n                    <td>Aprovisionamiento de café verde o tostado · precios por volumen</td>\n                </tr>
+                    <tr><td><strong>Contenido</strong></td>\n                    <td>Reel etiquetando al aliado en primeras 72 horas</td>\n                </tr>
+                </tbody>
+            </table>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -253,20 +769,14 @@
 
     function escapeHtml(str) { if(!str) return ''; return String(str).replace(/[&<>]/g, m => m==='&'?'&amp;': m==='<'?'&lt;':'&gt;'); }
 
-    // ==================== NORMALIZACIÓN DE NÚMERO DE WHATSAPP ====================
+    // Normalización de WhatsApp
     function normalizeWhatsapp(whatsapp) {
         if (!whatsapp) return '';
-        let cleaned = whatsapp.trim();
-        // Si ya empieza con '+', lo dejamos igual, pero eliminamos espacios y guiones
-        cleaned = cleaned.replace(/[\s\-\(\)]/g, '');
-        // Si no empieza con '+', pero parece un número colombiano (10 dígitos), agregamos '+57'
-        if (!cleaned.startsWith('+') && /^\d{10}$/.test(cleaned)) {
-            cleaned = '+57' + cleaned;
-        }
+        let cleaned = whatsapp.trim().replace(/[\s\-\(\)]/g, '');
+        if (!cleaned.startsWith('+') && /^\d{10}$/.test(cleaned)) cleaned = '+57' + cleaned;
         return cleaned;
     }
 
-    // ==================== ACTUALIZACIÓN DE KPIs Y ALERTAS ====================
     function updateDashboardFromPipeline() {
         const today = new Date(); today.setHours(0,0,0,0);
         const sevenDaysAgo = new Date(today); sevenDaysAgo.setDate(today.getDate() - 7);
@@ -320,7 +830,6 @@
         alertsContainer.innerHTML = html;
     }
 
-    // ==================== RENDERIZADO DE TABLA PIPELINE ====================
     function renderPipelineTable() {
         const tbody = document.getElementById('pipeline-body');
         if (!tbody) return;
@@ -387,7 +896,6 @@
         if (!pipelineData[idx]) return;
         let value = e.target.value;
         if (field === 'gramos250' || field === 'gramos500') value = parseInt(value) || 0;
-        // Normalizar WhatsApp antes de guardar
         if (field === 'whatsapp') value = normalizeWhatsapp(value);
         pipelineData[idx][field] = value;
         saveToDriveSilent();
@@ -397,7 +905,7 @@
             updateMapMarkers();
             updateAlerts();
         }
-        renderPipelineTable(); // refresca colores
+        renderPipelineTable();
     }
 
     function updateZonesFromPipeline() {
@@ -415,16 +923,10 @@
         }
     }
 
-    // ==================== COMUNICACIÓN CON GOOGLE SHEETS ====================
     async function saveToDriveSilent() {
         if (!SCRIPT_URL) return;
         try {
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(pipelineData)
-            });
+            await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(pipelineData) });
         } catch(e) { console.warn("Auto-guardado falló", e); }
     }
 
@@ -432,16 +934,9 @@
         if (!SCRIPT_URL) { alert("La URL del script no está configurada."); return; }
         try {
             alert("🔄 Enviando datos a Google Sheets...");
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(pipelineData)
-            });
-            alert("✅ Solicitud de guardado enviada. Revisa tu hoja dentro de unos segundos.\nSi los números de WhatsApp aparecen con comilla, es normal (es la forma de evitar #ERROR!).");
-        } catch(e) {
-            alert("❌ Error al guardar: " + e.message + "\nAsegúrate de que la URL del script sea correcta y que el script esté publicado.");
-        }
+            await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(pipelineData) });
+            alert("✅ Solicitud de guardado enviada. Revisa tu hoja.\nSi los números de WhatsApp aparecen con comilla, es normal (evita #ERROR!).");
+        } catch(e) { alert("❌ Error al guardar: " + e.message); }
     }
 
     async function loadFromDrive() {
@@ -452,10 +947,7 @@
             if (Array.isArray(data)) {
                 pipelineData = data.map(p => {
                     if (!p.id) p.id = Date.now() + Math.random();
-                    // Si el número de WhatsApp viene con una comilla al inicio (escapado), la eliminamos para mostrar correctamente
-                    if (p.whatsapp && typeof p.whatsapp === 'string' && p.whatsapp.startsWith("'")) {
-                        p.whatsapp = p.whatsapp.substring(1);
-                    }
+                    if (p.whatsapp && typeof p.whatsapp === 'string' && p.whatsapp.startsWith("'")) p.whatsapp = p.whatsapp.substring(1);
                     return p;
                 });
                 if (pipelineData.length === 0) {
@@ -486,7 +978,6 @@
         } catch(e) { alert("❌ Error al cargar: " + e.message); }
     }
 
-    // ==================== CARGA DE ARCHIVOS ARPA ====================
     function processArpaFile(file) {
         const reader = new FileReader();
         reader.onload = function(evt) {
@@ -502,9 +993,7 @@
             const idxDireccion = headers.findIndex(h => /direccion|address/.test(h));
             const idxZona = headers.findIndex(h => /zona|ubicación/.test(h));
             const idxInstagram = headers.findIndex(h => /instagram|ig/.test(h));
-
             if (idxNombre === -1) { alert("No se encontró columna con nombres."); return; }
-
             const existingNames = new Set(pipelineData.map(p => p.nombre?.toLowerCase() || ""));
             const existingPhones = new Set(pipelineData.map(p => p.whatsapp).filter(p => p));
             const nuevos = [];
@@ -524,12 +1013,8 @@
                 if (zona === 'N/A') zona = 'El Poblado';
                 let instagram = idxInstagram !== -1 && row[idxInstagram] ? String(row[idxInstagram]).trim() : '';
                 if (instagram === 'N/A') instagram = '';
-
-                // Normalizar WhatsApp
                 if (whatsapp) whatsapp = normalizeWhatsapp(whatsapp);
-
                 if (existingNames.has(nombre.toLowerCase()) || (whatsapp && existingPhones.has(whatsapp))) continue;
-
                 nuevos.push({
                     id: Date.now() + Math.random(),
                     nombre, zona, whatsapp, email, direccion, instagram,
@@ -551,7 +1036,6 @@
         reader.readAsArrayBuffer(file);
     }
 
-    // ==================== MAPA CON CACHE ====================
     async function geocode(address) {
         if (geoCache[address]) return geoCache[address];
         try {
@@ -598,21 +1082,12 @@
             const coords = await geocode(item.direccion);
             if (coords) {
                 const color = getEstadoColor(item.estado);
-                const marker = L.circleMarker([coords.lat, coords.lon], {
-                    radius: 8, fillColor: color, color: '#fff', weight: 2, fillOpacity: 0.8
-                }).addTo(markersLayer);
-                marker.bindPopup(`
-                    <b>${escapeHtml(item.nombre)}</b><br>
-                    📍 ${escapeHtml(item.direccion)}<br>
-                    📞 ${escapeHtml(item.whatsapp)}<br>
-                    ✉️ ${escapeHtml(item.email)}<br>
-                    <span style="color:${color}">Estado: ${item.estado}</span>
-                `);
+                const marker = L.circleMarker([coords.lat, coords.lon], { radius: 8, fillColor: color, color: '#fff', weight: 2, fillOpacity: 0.8 }).addTo(markersLayer);
+                marker.bindPopup(`<b>${escapeHtml(item.nombre)}</b><br>📍 ${escapeHtml(item.direccion)}<br>📞 ${escapeHtml(item.whatsapp)}<br>✉️ ${escapeHtml(item.email)}<br><span style="color:${color}">Estado: ${item.estado}</span>`);
             }
         }
     }
 
-    // ==================== AGREGAR FILA MANUAL ====================
     function addRow() {
         pipelineData.push({
             id: Date.now() + Math.random(),
@@ -625,7 +1100,6 @@
         saveToDriveSilent();
     }
 
-    // ==================== EVENTOS Y ARRANQUE ====================
     document.getElementById('save-drive-btn').onclick = saveToDriveManual;
     document.getElementById('load-drive-btn').onclick = loadFromDrive;
     document.getElementById('arpa-upload-btn').onclick = () => document.getElementById('arpa-file-input').click();
