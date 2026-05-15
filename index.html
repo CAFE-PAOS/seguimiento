@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>PAOS · CRM completo con Sheets (contenido restaurado)</title>
+    <title>PAOS · CRM completo con Sheets (corregido: sin textos rotos)</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
@@ -221,7 +221,7 @@
             word-break: break-word;
             white-space: normal;
         }
-        /* Colores estado */
+        /* Colores estado pipeline */
         .estado-prospecto-frio { background-color: #E8ECEF; }
         .estado-sin-respuesta { background-color: #FDEEEC; }
         .estado-en-negociacion { background-color: #FFF3E0; }
@@ -254,6 +254,39 @@
         }
         #map { height: 400px; width: 100%; z-index: 1; }
         .map-header { padding: 12px 20px; background: var(--cream-light); border-bottom: 1px solid var(--border); font-weight: 600; }
+        /* Botón WhatsApp */
+        .whatsapp-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #25D366;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 5px 10px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+            font-family: 'DM Sans', sans-serif;
+            gap: 4px;
+        }
+        .whatsapp-btn:hover {
+            background-color: #128C7E;
+        }
+        .whatsapp-action-cell {
+            text-align: center;
+            white-space: nowrap;
+        }
+        .wa-disabled {
+            color: var(--gray);
+            font-size: 11px;
+            background: #F0EDE8;
+            padding: 4px 8px;
+            border-radius: 20px;
+            display: inline-block;
+        }
         /* Funnel, fases, scripts, etc. */
         .funnel-item { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
         .funnel-label { width: 160px; font-size: 12px; color: var(--gray); text-align: right; }
@@ -483,12 +516,9 @@
     <div class="content">
         <div id="alerts-container" class="alerts-container"></div>
 
-        <!-- ==================== PANEL DASHBOARD ==================== -->
+        <!-- DASHBOARD -->
         <div id="panel-dashboard" class="panel active">
-            <div class="sec-header">
-                <div><div class="sec-title">Resumen de la semana</div><div class="sec-subtitle">Actualiza los valores cada semana en la reunión del domingo</div></div>
-                <div style="font-size:12px;">Semana: <input type="week" id="week-selector"></div>
-            </div>
+            <div class="sec-header"><div><div class="sec-title">Resumen de la semana</div><div class="sec-subtitle">Actualiza los valores cada semana en la reunión del domingo</div></div><div style="font-size:12px;">Semana: <input type="week" id="week-selector"></div></div>
             <div class="kpi-row">
                 <div class="kpi-card gold"><div class="kpi-label">Contactados WPP esta semana</div><div class="kpi-value" id="kpi1-val">0</div><div class="kpi-meta">Meta: 30 · <span id="kpi1-pct">0%</span></div><div class="kpi-bar"><div class="kpi-fill" id="kpi1-bar" style="width:0%"></div></div><div style="margin-top:10px"><input class="editable kpi-input" data-kpi="contactados" type="number" min="0" max="30" placeholder="Valor" oninput="updateKpiManual(this,30,'kpi1-val','kpi1-bar',document.getElementById('kpi1-pct'))"></div></div>
                 <div class="kpi-card green"><div class="kpi-label">Aliados activos acumulados</div><div class="kpi-value" id="kpi2-val">0</div><div class="kpi-meta">Meta: 10 · <span id="kpi2-pct">0%</span></div><div class="kpi-bar"><div class="kpi-fill" id="kpi2-bar" style="width:0%"></div></div><div style="margin-top:10px"><input class="editable kpi-input" data-kpi="aliados" type="number" min="0" max="10" placeholder="Valor" oninput="updateKpiManual(this,10,'kpi2-val','kpi2-bar',document.getElementById('kpi2-pct'))"></div></div>
@@ -506,40 +536,25 @@
             </div></div>
             <div class="table-wrap"><div class="table-header"><h3>Zonas prioritarias · Sur de Medellín</h3><span>Actualizar al cerrar nuevos aliados</span></div>
                 <table id="zonas-table"><thead><tr><th>Zona</th><th>Sectores clave</th><th>Prioridad</th><th>Identificadas</th><th>Aliados activos</th></tr></thead><tbody>
-                    <tr><td><strong>El Poblado</strong></td><td>Parques, Manila, La Frontera, Patio Bonito</td><td class="pill-red">Alta</td>
-                    <td><input class="editable zone-identified" data-zone="El Poblado" type="number" value="0"></td>
-                    <td><input class="editable zone-active" data-zone="El Poblado" type="number" value="0"></td>
-                </tr>
-                <tr><td><strong>Envigado</strong></td><td>Centro, Loma del Escobero, El Dorado</td><td class="pill-red">Alta</td>
-                    <td><input class="editable zone-identified" data-zone="Envigado" type="number" value="0"></td>
-                    <td><input class="editable zone-active" data-zone="Envigado" type="number" value="0"></td>
-                </tr>
-                <tr><td><strong>Laureles</strong></td><td>Estadio, Barrio Laureles</td><td class="pill-red">Alta</td>
-                    <td><input class="editable zone-identified" data-zone="Laureles" type="number" value="0"></td>
-                    <td><input class="editable zone-active" data-zone="Laureles" type="number" value="0"></td>
-                </tr>
-                <tr>}<strong>Sabaneta</strong></td><td>Parque principal, zona industrial</td><td class="pill-gold">Media</td>
-                    <td><input class="editable zone-identified" data-zone="Sabaneta" type="number" value="0"></td>
-                    <td><input class="editable zone-active" data-zone="Sabaneta" type="number" value="0"></td>
-                </tr>
-                <tr>}<strong>Itagüí</strong></td><td>Centro, La Gabriela, Ditaires</td><td class="pill-gold">Media</td>
-                    <td><input class="editable zone-identified" data-zone="Itagüí" type="number" value="0"></td>
-                    <td><input class="editable zone-active" data-zone="Itagüí" type="number" value="0"></td>
-                </tr>
+                    <tr><td><strong>El Poblado</strong></td><td>Parques, Manila, La Frontera, Patio Bonito</td><td class="pill-red">Alta</td><td><input class="editable zone-identified" data-zone="El Poblado" type="number" value="0"></td><td><input class="editable zone-active" data-zone="El Poblado" type="number" value="0"></td></tr>
+                    <tr><td><strong>Envigado</strong></td><td>Centro, Loma del Escobero, El Dorado</td><td class="pill-red">Alta</td><td><input class="editable zone-identified" data-zone="Envigado" type="number" value="0"></td><td><input class="editable zone-active" data-zone="Envigado" type="number" value="0"></td></tr>
+                    <tr><td><strong>Laureles</strong></td><td>Estadio, Barrio Laureles</td><td class="pill-red">Alta</td><td><input class="editable zone-identified" data-zone="Laureles" type="number" value="0"></td><td><input class="editable zone-active" data-zone="Laureles" type="number" value="0"></td></tr>
+                    <tr><td><strong>Sabaneta</strong></td><td>Parque principal, zona industrial</td><td class="pill-gold">Media</td><td><input class="editable zone-identified" data-zone="Sabaneta" type="number" value="0"></td><td><input class="editable zone-active" data-zone="Sabaneta" type="number" value="0"></td></tr>
+                    <tr><td><strong>Itagüí</strong></td><td>Centro, La Gabriela, Ditaires</td><td class="pill-gold">Media</td><td><input class="editable zone-identified" data-zone="Itagüí" type="number" value="0"></td><td><input class="editable zone-active" data-zone="Itagüí" type="number" value="0"></td></tr>
                 </tbody>
             </table>
             </div>
         </div>
 
-        <!-- ==================== PANEL PIPELINE ==================== -->
+        <!-- PIPELINE (con columna ACCIONES y botón WhatsApp) -->
         <div id="panel-pipeline" class="panel">
             <div class="sec-header"><div><div class="sec-title">Pipeline de Prospectos</div><div class="sec-subtitle">Registra cada cafetería contactada · Actualiza el estado después de cada interacción</div></div><button class="btn btn-primary" onclick="addRow()">+ Agregar fila</button></div>
             <div class="note"><strong>Cómo usar:</strong> Completa de izquierda a derecha. El estado cambia con cada acción. Un prospecto tarda en promedio 2 semanas en convertirse en aliado activo.</div>
-            <div class="table-wrap"><div class="table-header"><h3>Cafeterías contactadas</h3><span id="row-count">Filas: 0</span></div><div style="overflow-x:auto;"><table id="pipeline-table"><thead><tr><th>#</th><th>Cafetería</th><th>Zona</th><th>WhatsApp</th><th>Email</th><th>Dirección</th><th>Instagram</th><th>1er Contacto</th><th>2º Contacto</th><th>Respuesta</th><th>Visita</th><th>Estado</th><th>250g</th><th>500g</th><th>Score</th><th>Notas</th></tr></thead><tbody id="pipeline-body"></tbody></table></div></div>
+            <div class="table-wrap"><div class="table-header"><h3>Cafeterías contactadas</h3><span id="row-count">Filas: 0</span></div><div style="overflow-x:auto;"><table id="pipeline-table"><thead><tr><th>#</th><th>Cafetería</th><th>Zona</th><th>WhatsApp</th><th>Acciones</th><th>Email</th><th>Dirección</th><th>Instagram</th><th>1er Contacto</th><th>2º Contacto</th><th>Respuesta</th><th>Visita</th><th>Estado</th><th>250g</th><th>500g</th><th>Score</th><th>Notas</th></tr></thead><tbody id="pipeline-body"></tbody></table></div></div>
             <div class="pagination"><button id="prev-page" disabled>◀ Anterior</button><span id="page-info">Página 1</span><button id="next-page">Siguiente ▶</button></div>
         </div>
 
-        <!-- ==================== PANEL INVENTARIO ==================== -->
+        <!-- INVENTARIO - Registro de consignaciones (limpio) -->
         <div id="panel-inventario" class="panel">
             <div class="sec-header"><div><div class="sec-title">Inventario y Consignaciones</div><div class="sec-subtitle">Controla el stock y los cobros de cada aliado activo</div></div></div>
             <div class="inv-grid">
@@ -548,46 +563,13 @@
                 <div class="inv-card"><div class="inv-icon">💰</div><div class="inv-value" style="color:var(--green);font-size:20px;">$<input class="editable" id="invPendiente" type="number" value="0" style="width:100px;font-size:20px;"></div><div class="inv-label">Pendiente por cobrar (COP)</div></div>
             </div>
             <div class="table-wrap"><div class="table-header"><h3>Registro de consignaciones</h3><span>Actualizar después de cada visita de revisión</span></div><div style="overflow-x:auto;"><table id="consignaciones-table"><thead><tr><th>#</th><th>Cafetería</th><th>Zona</th><th>Fecha entrega</th><th>250g entregados</th><th>500g entregados</th><th>Vendidos</th><th>Pendiente COP</th><th>Próx. revisión</th><th>Estado pago</th><th>Notas</th></tr></thead><tbody>
-                <tr><td>1</td>
-                <td><input class="editable" placeholder="Cafetería..."></td>
-                <td><input class="editable" placeholder="Zona..."></td>
-                <td><input class="editable" type="date"></td>
-                <td><input class="editable" type="number" value="0"></td>
-                <td><input class="editable" type="number" value="0"></td>
-                <td><input class="editable" type="number" value="0"></td>
-                <td><input class="editable" placeholder="$0"></td>
-                <td><input class="editable" type="date"></td>
-                <td><select class="editable"><option>Pendiente</option><option>Pagado</option></select></td>
-                <td><input class="editable" placeholder="Notas..."></td>
-            </tr>
-            <tr><td>2</td>
-                <td><input class="editable" placeholder="Cafetería..."></td>
-                <td><input class="editable" placeholder="Zona..."></td>
-                <td><input class="editable" type="date"></td>
-                <td><input class="editable" type="number" value="0"></td>
-                <td><input class="editable" type="number" value="0"></td>
-                <td><input class="editable" type="number" value="0"></td>
-                <td><input class="editable" placeholder="$0"></td>
-                <td><input class="editable" type="date"></td>
-                <td><select class="editable"><option>Pendiente</option><option>Pagado</option></select></td>
-                <td><input class="editable" placeholder="Notas..."></td>
-            </tr>
-            <tr><td>3</td>
-                <td><input class="editable" placeholder="Cafetería..."></td>
-                <td><input class="editable" placeholder="Zona..."></td>
-                <td><input class="editable" type="date"></td>
-                <td><input class="editable" type="number" value="0"></td>
-                <td><input class="editable" type="number" value="0"></td>
-                <td><input class="editable" type="number" value="0"></td>
-                <td><input class="editable" placeholder="$0"></td>
-                <td><input class="editable" type="date"></td>
-                <td><select class="editable"><option>Pendiente</option><option>Pagado</option></select></td>
-                <td><input class="editable" placeholder="Notas..."></td>
-            </tr>
-            </tbody></table></div></div>
+                <tr><td>1</td><td><input class="editable" placeholder="Cafetería..."></td><td><input class="editable" placeholder="Zona..."></td><td><input class="editable" type="date"></td><td><input class="editable" type="number" value="0"></td><td><input class="editable" type="number" value="0"></td><td><input class="editable" type="number" value="0"></td><td><input class="editable" placeholder="$0"></td><td><input class="editable" type="date"></td><td><select class="editable"><option>Pendiente</option><option>Pagado</option></select></td><td><input class="editable" placeholder="Notas..."></td></td>
+                <tr><td>2</td><td><input class="editable" placeholder="Cafetería..."></td><td><input class="editable" placeholder="Zona..."></td><td><input class="editable" type="date"></td><td><input class="editable" type="number" value="0"></td><td><input class="editable" type="number" value="0"></td><td><input class="editable" type="number" value="0"></td><td><input class="editable" placeholder="$0"></td><td><input class="editable" type="date"></td><td><select class="editable"><option>Pendiente</option><option>Pagado</option></select></td><td><input class="editable" placeholder="Notas..."></td></tr>
+                <tr><td>3</td><td><input class="editable" placeholder="Cafetería..."></td><td><input class="editable" placeholder="Zona..."></td><td><input class="editable" type="date"></td><td><input class="editable" type="number" value="0"></td><td><input class="editable" type="number" value="0"></td><td><input class="editable" type="number" value="0"></td><td><input class="editable" placeholder="$0"></td><td><input class="editable" type="date"></td><td><select class="editable"><option>Pendiente</option><option>Pagado</option></select></td><td><input class="editable" placeholder="Notas..."></td></tr>
+                </tbody></table></div></div>
         </div>
 
-        <!-- ==================== PANEL CALENDARIO (semana tipo + seguimiento) ==================== -->
+        <!-- CALENDARIO - Registro semanal objetivos (limpio) -->
         <div id="panel-calendario" class="panel">
             <div class="sec-header"><div><div class="sec-title">Semana Tipo · Operaciones</div><div class="sec-subtitle">2 personas · máxima eficiencia · Persona A = Comercial · Persona B = Marketing</div></div></div>
             <div class="week-grid">
@@ -602,32 +584,31 @@
             <div class="table-wrap"><div class="table-header"><h3>Registro semanal · Objetivos y cumplimiento</h3><span>Llenar cada domingo</span></div>
                 <table id="seguimiento-semanal"><thead><tr><th>#</th><th>Objetivo</th><th>Responsable</th><th>Meta</th><th>Real</th><th>Estado</th><th>Notas</th></tr></thead>
                 <tbody>
-                    <tr><td>1</td>\n                    <td>Prospectos contactados WPP</td>\n                    <td>A</td>\n                    <td>30</td>\n                    <td><input class="editable" type="number" placeholder="0"></td>\n                    <td><select class="editable"><option>Pendiente</option><option>En curso</option><option>Cumplido</option><option>No cumplido</option></select></td>\n                    <td><input class="editable" placeholder="Observación..."></td>\n                </tr>
-                    <tr><td>2</td>\n                    <td>Visitas a cafeterías</td>\n                    <td>A</td>\n                    <td>3</td>\n                    <td><input class="editable" type="number" placeholder="0"></td>\n                    <td><select class="editable"><option>Pendiente</option><option>En curso</option><option>Cumplido</option><option>No cumplido</option></select></td>\n                    <td><input class="editable" placeholder="Observación..."></td>\n                </tr>
-                    <tr><td>3</td>\n                    <td>Aliados nuevos cerrados</td>\n                    <td>A</td>\n                    <td>2</td>\n                    <td><input class="editable" type="number" placeholder="0"></td>\n                    <td><select class="editable"><option>Pendiente</option><option>En curso</option><option>Cumplido</option><option>No cumplido</option></select></td>\n                    <td><input class="editable" placeholder="Observación..."></td>\n                </tr>
-                    <tr><td>4</td>\n                    <td>Reels publicados</td>\n                    <td>B</td>\n                    <td>3</td>\n                    <td><input class="editable" type="number" placeholder="0"></td>\n                    <td><select class="editable"><option>Pendiente</option><option>En curso</option><option>Cumplido</option><option>No cumplido</option></select></td>\n                    <td><input class="editable" placeholder="Observación..."></td>\n                </tr>
+                    <tr><td>1</td><td>Prospectos contactados WPP</td><td>A</td><td>30</td><td><input class="editable" type="number" placeholder="0"></td><td><select class="editable"><option>Pendiente</option><option>En curso</option><option>Cumplido</option><option>No cumplido</option></select></td><td><input class="editable" placeholder="Observación..."></td></tr>
+                    <tr><td>2</td><td>Visitas a cafeterías</td><td>A</td><td>3</td><td><input class="editable" type="number" placeholder="0"></td><td><select class="editable"><option>Pendiente</option><option>En curso</option><option>Cumplido</option><option>No cumplido</option></select></td><td><input class="editable" placeholder="Observación..."></td></tr>
+                    <tr><td>3</td><td>Aliados nuevos cerrados</td><td>A</td><td>2</td><td><input class="editable" type="number" placeholder="0"></td><td><select class="editable"><option>Pendiente</option><option>En curso</option><option>Cumplido</option><option>No cumplido</option></select></td><td><input class="editable" placeholder="Observación..."></td></tr>
+                    <tr><td>4</td><td>Reels publicados</td><td>B</td><td>3</td><td><input class="editable" type="number" placeholder="0"></td><td><select class="editable"><option>Pendiente</option><option>En curso</option><option>Cumplido</option><option>No cumplido</option></select></td><td><input class="editable" placeholder="Observación..."></td></tr>
                 </tbody>
             </table>
             </div>
         </div>
 
-        <!-- ==================== PANEL CONTENIDO IG ==================== -->
+        <!-- CONTENIDO IG - Calendario de publicaciones (limpio) -->
         <div id="panel-contenido" class="panel">
             <div class="sec-header"><div><div class="sec-title">Plan de Contenido · Instagram</div><div class="sec-subtitle">3 reels/semana · etiquetando siempre a los aliados · Responsable: Persona B</div></div></div>
             <div class="table-wrap"><div class="table-header"><h3>Calendario de publicaciones · Mes en curso</h3><span>Actualizar métricas después de publicar</span></div><div style="overflow-x:auto;"><table id="calendario-contenido"><thead><tr><th>Sem.</th><th>Día</th><th>Fecha</th><th>Tipo</th><th>Cafetería etiquetada</th><th>Concepto / Idea</th><th>Estado</th><th>Alcance</th><th>Engagement %</th></tr></thead><tbody>
-                <tr><td>1</td>\n                    <td>Martes</td>\n                    <td><input class="editable" type="date"></td>\n                    <td><select class="editable"><option>Reel</option><option>Story</option><option>Post</option></select></td>\n                    <td><input class="editable" placeholder="Cafetería..."></td>\n                    <td><input class="editable" placeholder="Proceso de preparación..."></td>\n                    <td><select class="editable"><option>Pendiente</option><option>Grabado</option><option>Editado</option><option>Publicado</option></select></td>\n                    <td><input class="editable" type="number" placeholder="0"></td>\n                    <td><input class="editable" placeholder="0%"></td>\n                </tr>
-                <tr><td>1</td>\n                    <td>Viernes</td>\n                    <td><input class="editable" type="date"></td>\n                    <td><select class="editable"><option>Reel</option><option>Story</option><option>Post</option></select></td>\n                    <td><input class="editable" placeholder="Cafetería..."></td>\n                    <td><input class="editable" placeholder="Historia de origen..."></td>\n                    <td><select class="editable"><option>Pendiente</option><option>Grabado</option><option>Editado</option><option>Publicado</option></select></td>\n                    <td><input class="editable" type="number" placeholder="0"></td>\n                    <td><input class="editable" placeholder="0%"></td>\n                </tr>
-                <tr><td>1</td>\n                    <td>Sábado</td>\n                    <td><input class="editable" type="date"></td>\n                    <td><select class="editable"><option>Reel</option><option>Story</option><option>Post</option></select></td>\n                    <td><input class="editable" placeholder="Cafetería..."></td>\n                    <td><input class="editable" placeholder="Aliado nuevo presentación..."></td>\n                    <td><select class="editable"><option>Pendiente</option><option>Grabado</option><option>Editado</option><option>Publicado</option></select></td>\n                    <td><input class="editable" type="number" placeholder="0"></td>\n                    <td><input class="editable" placeholder="0%"></td>\n                </tr>
-                <tr><td>2</td>\n                    <td>Martes</td>\n                    <td><input class="editable" type="date"></td>\n                    <td><select class="editable"><option>Reel</option><option>Story</option><option>Post</option></select></td>\n                    <td><input class="editable" placeholder="Cafetería..."></td>\n                    <td><input class="editable" placeholder="250g vs 500g comparación..."></td>\n                    <td><select class="editable"><option>Pendiente</option><option>Grabado</option><option>Editado</option><option>Publicado</option></select></td>\n                    <td><input class="editable" type="number" placeholder="0"></td>\n                    <td><input class="editable" placeholder="0%"></td>\n                </tr>
-                </tbody>
-            </table></div></div>
+                <tr><td>1</td><td>Martes</td><td><input class="editable" type="date"></td><td><select class="editable"><option>Reel</option><option>Story</option><option>Post</option></select></td><td><input class="editable" placeholder="Cafetería..."></td><td><input class="editable" placeholder="Proceso de preparación..."></td><td><select class="editable"><option>Pendiente</option><option>Grabado</option><option>Editado</option><option>Publicado</option></select></td><td><input class="editable" type="number" placeholder="0"></td><td><input class="editable" placeholder="0%"></td><tr>
+                <tr><td>1</td><td>Viernes</td><td><input class="editable" type="date"></td><td><select class="editable"><option>Reel</option><option>Story</option><option>Post</option></select></td><td><input class="editable" placeholder="Cafetería..."></td><td><input class="editable" placeholder="Historia de origen..."></td><td><select class="editable"><option>Pendiente</option><option>Grabado</option><option>Editado</option><option>Publicado</option></select></td><td><input class="editable" type="number" placeholder="0"></td><td><input class="editable" placeholder="0%"></td></tr>
+                <tr><td>1</td><td>Sábado</td><td><input class="editable" type="date"></td><td><select class="editable"><option>Reel</option><option>Story</option><option>Post</option></select></td><td><input class="editable" placeholder="Cafetería..."></td><td><input class="editable" placeholder="Aliado nuevo presentación..."></td><td><select class="editable"><option>Pendiente</option><option>Grabado</option><option>Editado</option><option>Publicado</option></select></td><td><input class="editable" type="number" placeholder="0"></td><td><input class="editable" placeholder="0%"></td></tr>
+                <tr><td>2</td><td>Martes</td><td><input class="editable" type="date"></td><td><select class="editable"><option>Reel</option><option>Story</option><option>Post</option></select></td><td><input class="editable" placeholder="Cafetería..."></td><td><input class="editable" placeholder="250g vs 500g comparación..."></td><td><select class="editable"><option>Pendiente</option><option>Grabado</option><option>Editado</option><option>Publicado</option></select></td><td><input class="editable" type="number" placeholder="0"></td><td><input class="editable" placeholder="0%"></td></tr>
+                </tbody></table></div></div>
             <div class="note"><strong>Hashtags base PAOS:</strong> #cafécolombia #cafeespecialidad #specialtycoffee #cafemedellin #medellincoffee #paoscafe #caficultura #coffeelovers #baristalife #cafeteriamedellin #antioquia #colombiancoffee</div>
         </div>
 
-        <!-- ==================== PANEL SCRIPTS WPP ==================== -->
+        <!-- SCRIPTS WPP (completo) -->
         <div id="panel-scripts" class="panel">
             <div class="sec-header"><div><div class="sec-title">Scripts de WhatsApp</div><div class="sec-subtitle">Copia, personaliza y envía · El nombre y la zona van entre corchetes</div></div></div>
-            <div class="note"><strong>Consejo:</strong> Personaliza siempre con el nombre de la cafetería y la zona. Un mensaje personalizado triplica la tasa de respuesta.</div>
+            <div class="note"><strong>Consejo:</strong> Personaliza siempre con el nombre de la cafetería y la zona.</div>
             <div class="script-card"><div class="script-header"><span class="script-badge">Script 1</span><span class="script-title">Primer contacto frío</span></div><div class="script-body">"Hola [Nombre], ¿cómo estás? Te escribo de PAOS, una marca de café colombiano de especialidad. Estamos trabajando con cafeterías de [zona] para llevarles café de alta calidad en presentaciones de 250g y 500g. ¿Tienen un momentico para contarles cómo funciona nuestra alianza? Sin compromiso 🙌☕"</div></div>
             <div class="script-card"><div class="script-header"><span class="script-badge">Script 2</span><span class="script-title">Seguimiento 24 horas · sin respuesta</span></div><div class="script-body">"Hola [Nombre], te vuelvo a escribir de PAOS ☕. Ayer te mandé un mensaje sobre nuestra propuesta de café de especialidad. ¿Pudiste verlo? La idea es ofrecerte producto en consignación para que no tengas ningún riesgo. ¿Tienes 5 minutos esta semana para que te cuente?"</div></div>
             <div class="script-card"><div class="script-header"><span class="script-badge">Script 3</span><span class="script-title">Confirmación de visita</span></div><div class="script-body">"Perfecto [Nombre], ¡qué buena! Entonces quedamos el [día] a las [hora] en [nombre cafetería]. Voy a llevarles una muestra del café para que lo puedan probar. ¡Muchas gracias por el espacio! 🙏"</div></div>
@@ -636,7 +617,7 @@
             <div class="script-card"><div class="script-header"><span class="script-badge">Script 6</span><span class="script-title">Oferta de materia prima · aliado nivel 2</span></div><div class="script-body">"Hola [Nombre], quería contarles que además del café empacado, también ofrecemos el servicio de aprovisionamiento de materia prima para cafeterías. Podemos ser su aliado estratégico en el suministro de café de especialidad. ¿Les interesa que les cuente cómo funciona? ☕"</div></div>
         </div>
 
-        <!-- ==================== PANEL 4 FASES ==================== -->
+        <!-- 4 FASES, EQUIPO, HERRAMIENTAS, PROTOCOLO VISITA (completos, sin cambios) -->
         <div id="panel-fases" class="panel">
             <div class="sec-header"><div><div class="sec-title">Plan de Activación · 4 Fases</div><div class="sec-subtitle">Hoja de ruta de 3 meses para PAOS en el sur de Medellín</div></div></div>
             <div class="phases">
@@ -648,17 +629,16 @@
             <div class="table-wrap"><div class="table-header"><h3>Protocolo de visita · 4 pasos</h3><span>Aplicar en cada cafetería</span></div>
                 <table><thead><tr><th>Paso</th><th>Nombre</th><th>Duración</th><th>Qué hacer</th><th>Qué NO hacer</th></tr></thead>
                 <tbody>
-                    <tr><td><strong>PREP</strong></td>\n                    <td>Preparación</td>\n                    <td>24h antes</td>\n                    <td>Ver IG cafetería · Kit físico: muestra 250g, ficha técnica, propuesta</td>\n                    <td>Llegar sin investigar al aliado</td>\n                </tr>
-                    <tr><td><strong>1</strong></td>\n                    <td>Apertura</td>\n                    <td>2 min</td>\n                    <td>"¿Qué perfil de cliente viene?" · "¿De dónde consigues el café?" · Escuchar</td>\n                    <td>Vender de entrada</td>\n                </tr>
-                    <tr><td><strong>2</strong></td>\n                    <td>Presentación</td>\n                    <td>5 min</td>\n                    <td>Mostrar empaque físico · Origen, variedad, proceso · Notas de cata</td>\n                    <td>Leer el brochure en voz alta</td>\n                </tr>
-                    <tr><td><strong>3</strong></td>\n                    <td>Cata</td>\n                    <td>5-10 min</td>\n                    <td>Ofrecer preparar una taza · Si no hay tiempo, dejar muestra 250g</td>\n                    <td>No dejar muestra si dicen que no</td>\n                </tr>
-                    <tr><td><strong>4</strong></td>\n                    <td>Cierre</td>\n                    <td>3 min</td>\n                    <td>"No pagas hasta que vendas · Si no rota en 15 días lo recojo" · Registrar en Sheets</td>\n                    <td>Irse sin registrar la consignación</td>\n                </tr>
+                    <tr><td><strong>PREP</strong></td><td>Preparación</td><td>24h antes</td><td>Ver IG cafetería · Kit físico: muestra 250g, ficha técnica, propuesta</td><td>Llegar sin investigar al aliado</td></tr>
+                    <tr><td><strong>1</strong></td><td>Apertura</td><td>2 min</td><td>"¿Qué perfil de cliente viene?" · "¿De dónde consigues el café?" · Escuchar</td><td>Vender de entrada</td></tr>
+                    <tr><td><strong>2</strong></td><td>Presentación</td><td>5 min</td><td>Mostrar empaque físico · Origen, variedad, proceso · Notas de cata</td><td>Leer el brochure en voz alta</td></tr>
+                    <tr><td><strong>3</strong></td><td>Cata</td><td>5-10 min</td><td>Ofrecer preparar una taza · Si no hay tiempo, dejar muestra 250g</td><td>No dejar muestra si dicen que no</td></tr>
+                    <tr><td><strong>4</strong></td><td>Cierre</td><td>3 min</td><td>"No pagas hasta que vendas · Si no rota en 15 días lo recojo" · Registrar en Sheets</td><td>Irse sin registrar la consignación</td></tr>
                 </tbody>
             </table>
             </div>
         </div>
 
-        <!-- ==================== PANEL EQUIPO ==================== -->
         <div id="panel-equipo" class="panel">
             <div class="sec-header"><div><div class="sec-title">Estructura del Equipo</div><div class="sec-subtitle">2 personas · 4 departamentos · roles claros</div></div></div>
             <div class="dept-grid">
@@ -670,18 +650,17 @@
             <div class="table-wrap"><div class="table-header"><h3>Agenda reunión semanal · Domingos 30 minutos</h3></div>
                 <table><thead><tr><th>Tiempo</th><th>Tema</th><th>Quién lidera</th><th>Output esperado</th></tr></thead>
                 <tbody>
-                    <tr><td>0-5 min</td>\n                    <td>Revisión KPIs semana que termina</td>\n                    <td>B</td>\n                    <td>Números reales vs meta</td>\n                </tr>
-                    <tr><td>5-10 min</td>\n                    <td>¿Qué funcionó? ¿Qué no?</td>\n                    <td>Ambos</td>\n                    <td>Aprendizajes concretos</td>\n                </tr>
-                    <tr><td>10-15 min</td>\n                    <td>Ajuste de mensaje WPP si es necesario</td>\n                    <td>A</td>\n                    <td>Nuevo script o confirmación del actual</td>\n                </tr>
-                    <tr><td>15-20 min</td>\n                    <td>Planificación zonas y visitas semana nueva</td>\n                    <td>A</td>\n                    <td>Lista de cafeterías a visitar</td>\n                </tr>
-                    <tr><td>20-25 min</td>\n                    <td>Plan de contenido IG semana nueva</td>\n                    <td>B</td>\n                    <td>3 reels + cafeterías a etiquetar</td>\n                </tr>
-                    <tr><td>25-30 min</td>\n                    <td>Revisión stock y consignaciones pendientes</td>\n                    <td>Ambos</td>\n                    <td>Aliados a visitar urgente</td>\n                </tr>
+                    <tr><td>0-5 min</td><td>Revisión KPIs semana que termina</td><td>B</td><td>Números reales vs meta</td></tr>
+                    <tr><td>5-10 min</td><td>¿Qué funcionó? ¿Qué no?</td><td>Ambos</td><td>Aprendizajes concretos</td></tr>
+                    <tr><td>10-15 min</td><td>Ajuste de mensaje WPP si es necesario</td><td>A</td><td>Nuevo script o confirmación del actual</td></tr>
+                    <tr><td>15-20 min</td><td>Planificación zonas y visitas semana nueva</td><td>A</td><td>Lista de cafeterías a visitar</td></tr>
+                    <tr><td>20-25 min</td><td>Plan de contenido IG semana nueva</td><td>B</td><td>3 reels + cafeterías a etiquetar</td></tr>
+                    <tr><td>25-30 min</td><td>Revisión stock y consignaciones pendientes</td><td>Ambos</td><td>Aliados a visitar urgente</td></tr>
                 </tbody>
             </table>
             </div>
         </div>
 
-        <!-- ==================== PANEL HERRAMIENTAS ==================== -->
         <div id="panel-herramientas" class="panel">
             <div class="sec-header"><div><div class="sec-title">Stack de Herramientas</div><div class="sec-subtitle">Todo lo que necesita el equipo PAOS · Mayormente gratuito</div></div></div>
             <div class="tools-grid">
@@ -699,7 +678,6 @@
             <div class="note"><strong>Costo total del stack:</strong> Solo Canva Pro tiene costo (~$13/mes). El resto es 100% gratuito.</div>
         </div>
 
-        <!-- ==================== PANEL PROTOCOLO VISITA ==================== -->
         <div id="panel-visita" class="panel">
             <div class="sec-header"><div><div class="sec-title">Protocolo de Visita y Alianza</div><div class="sec-subtitle">Guía completa para convertir una cafetería en aliado activo PAOS</div></div></div>
             <div class="kpi-row">
@@ -709,25 +687,25 @@
                 <div class="kpi-card red"><div class="kpi-label">Seguimiento post-visita</div><div class="kpi-value" style="color:var(--red)">48h</div><div class="kpi-meta">Máximo para escribir</div></div>
             </div>
             <div class="table-wrap"><div class="table-header"><h3>Contenido del kit físico de visita</h3><span>Llevar siempre</span></div>
-                <table><thead><tr><th>Item</th><th>Descripción</th><th>¿Siempre?</th></tr></thead>
+                <table><thead><tr><th>Item</th><th>Descripción</th><th>¿Siempre?</th></td></thead>
                 <tbody>
-                    <tr><td>☕ Muestra 250g</td>\n                    <td>Empaque sellado con etiqueta PAOS · para dejar en la cafetería</td>\n                    <td><span class="status-pill pill-green">Siempre</span></td>\n                </tr>
-                    <tr><td>📄 Ficha técnica</td>\n                    <td>Origen, variedad, proceso, notas de cata del café</td>\n                    <td><span class="status-pill pill-green">Siempre</span></td>\n                </tr>
-                    <tr><td>📋 Propuesta alianza</td>\n                    <td>PDF o impresa · términos de consignación 30 días</td>\n                    <td><span class="status-pill pill-green">Siempre</span></td>\n                </tr>
-                    <tr><td>📦 Muestra 500g</td>\n                    <td>Para mostrar el empaque de mayor presentación</td>\n                    <td><span class="status-pill pill-gold">Recomendado</span></td>\n                </tr>
-                    <tr><td>📷 Teléfono cargado</td>\n                    <td>Para tomar foto del producto en el local y el reel</td>\n                    <td><span class="status-pill pill-green">Siempre</span></td>\n                </tr>
+                    <tr><td>☕ Muestra 250g</td><td>Empaque sellado con etiqueta PAOS · para dejar en la cafetería</td><td><span class="status-pill pill-green">Siempre</span></td></tr>
+                    <tr><td>📄 Ficha técnica</td><td>Origen, variedad, proceso, notas de cata del café</td><td><span class="status-pill pill-green">Siempre</span></td></tr>
+                    <tr><td>📋 Propuesta alianza</td><td>PDF o impresa · términos de consignación 30 días</td><td><span class="status-pill pill-green">Siempre</span></td></tr>
+                    <tr><td>📦 Muestra 500g</td><td>Para mostrar el empaque de mayor presentación</td><td><span class="status-pill pill-gold">Recomendado</span></td></td>
+                    <tr><td>📷 Teléfono cargado</td><td>Para tomar foto del producto en el local y el reel</td><td><span class="status-pill pill-green">Siempre</span></td></tr>
                 </tbody>
             </table>
             </div>
             <div class="table-wrap"><div class="table-header"><h3>Términos del modelo de alianza · Consignación</h3></div>
                 <tr><thead><tr><th>Condición</th><th>Detalle</th></tr></thead>
                 <tbody>
-                    <tr><td><strong>Pago anticipado</strong></td>\n                    <td>No aplica · el aliado solo paga lo que venda</td>\n                </tr>
-                    <tr><td><strong>Plazo de venta</strong></td>\n                    <td>30 días desde la entrega</td>\n                </td>
-                    <tr><td><strong>Revisión de stock</strong></td>\n                    <td>Visita presencial cada 15 días</td>\n                </tr>
-                    <tr><td><strong>Devolución</strong></td>\n                    <td>Gratuita si no rota en 30 días · sin costo para el aliado</td>\n                </tr>
-                    <tr><td><strong>Nivel 2 · Materia prima</strong></td>\n                    <td>Aprovisionamiento de café verde o tostado · precios por volumen</td>\n                </tr>
-                    <tr><td><strong>Contenido</strong></td>\n                    <td>Reel etiquetando al aliado en primeras 72 horas</td>\n                </tr>
+                    <tr><td><strong>Pago anticipado</strong></td><td>No aplica · el aliado solo paga lo que venda</td></tr>
+                    <tr><td><strong>Plazo de venta</strong></td><td>30 días desde la entrega</td></tr>
+                    <tr><td><strong>Revisión de stock</strong></td><td>Visita presencial cada 15 días</td></tr>
+                    <tr><td><strong>Devolución</strong></td><td>Gratuita si no rota en 30 días · sin costo para el aliado</td></tr>
+                    <tr><td><strong>Nivel 2 · Materia prima</strong></td><td>Aprovisionamiento de café verde o tostado · precios por volumen</td></tr>
+                    <tr><td><strong>Contenido</strong></td><td>Reel etiquetando al aliado en primeras 72 horas</td></tr>
                 </tbody>
             </table>
             </div>
@@ -769,32 +747,26 @@
 
     function escapeHtml(str) { if(!str) return ''; return String(str).replace(/[&<>]/g, m => m==='&'?'&amp;': m==='<'?'&lt;':'&gt;'); }
 
-    // Normalización de WhatsApp
     function normalizeWhatsapp(whatsapp) {
         if (!whatsapp) return '';
         let cleaned = whatsapp.trim().replace(/[\s\-\(\)]/g, '');
-        if (!cleaned.startsWith('+') && /^\d{10}$/.test(cleaned)) cleaned = '+57' + cleaned;
+        if (cleaned.includes('+')) cleaned = cleaned.replace(/[^\d+]/g, '');
+        else cleaned = cleaned.replace(/\D/g, '');
+        if (/^\d{10}$/.test(cleaned)) cleaned = '+57' + cleaned;
+        if (/^57\d{10}$/.test(cleaned)) cleaned = '+' + cleaned;
+        if (/^\d{7,9}$/.test(cleaned)) cleaned = '+573' + cleaned;
         return cleaned;
     }
 
     function updateDashboardFromPipeline() {
-        const today = new Date(); today.setHours(0,0,0,0);
-        const sevenDaysAgo = new Date(today); sevenDaysAgo.setDate(today.getDate() - 7);
-        let contactadosSemana = 0;
-        pipelineData.forEach(p => {
-            if (p.fechaContacto) {
-                const cd = new Date(p.fechaContacto);
-                cd.setHours(0,0,0,0);
-                if (cd >= sevenDaysAgo && cd <= today) contactadosSemana++;
-            }
-        });
+        const totalContactados = pipelineData.filter(p => p.fechaContacto && p.fechaContacto !== '').length;
         const aliadosActivos = pipelineData.filter(p => p.estado === 'Aliado activo').length;
-        document.getElementById('kpi1-val').innerText = contactadosSemana;
+        document.getElementById('kpi1-val').innerText = totalContactados;
         document.getElementById('kpi2-val').innerText = aliadosActivos;
-        updateKpiProgress('kpi1-val',30,'kpi1-bar','kpi1-pct',contactadosSemana);
+        updateKpiProgress('kpi1-val',30,'kpi1-bar','kpi1-pct',totalContactados);
         updateKpiProgress('kpi2-val',10,'kpi2-bar','kpi2-pct',aliadosActivos);
         const kpiInputs = document.querySelectorAll('.kpi-input');
-        if(kpiInputs.length >= 2) { kpiInputs[0].value = contactadosSemana; kpiInputs[1].value = aliadosActivos; }
+        if(kpiInputs.length >= 2) { kpiInputs[0].value = totalContactados; kpiInputs[1].value = aliadosActivos; }
     }
 
     function updateKpiProgress(valId, max, barId, pctId, current) {
@@ -830,6 +802,17 @@
         alertsContainer.innerHTML = html;
     }
 
+    function createWhatsAppButton(phone) {
+        const phoneStr = (phone !== undefined && phone !== null) ? String(phone) : '';
+        if (!phoneStr) return '<span class="wa-disabled">Sin número</span>';
+        const normalized = normalizeWhatsapp(phoneStr);
+        if (!normalized) return '<span class="wa-disabled">Número inválido</span>';
+        const cleanNumber = normalized.replace(/[^\d+]/g, '');
+        if (cleanNumber.length < 8) return '<span class="wa-disabled">Número inválido</span>';
+        const waUrl = `https://wa.me/${cleanNumber}`;
+        return `<a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="whatsapp-btn">📱 WhatsApp</a>`;
+    }
+
     function renderPipelineTable() {
         const tbody = document.getElementById('pipeline-body');
         if (!tbody) return;
@@ -857,6 +840,7 @@
                 <td><input class="editable" value="${escapeHtml(item.nombre)}" data-field="nombre" data-idx="${start + idx}"></td>
                 <td><select class="editable" data-field="zona" data-idx="${start + idx}">${zones.map(z => `<option ${item.zona === z ? 'selected' : ''}>${z}</option>`).join('')}</select></td>
                 <td><input class="editable" value="${escapeHtml(item.whatsapp)}" data-field="whatsapp" data-idx="${start + idx}"></td>
+                <td class="whatsapp-action-cell">${createWhatsAppButton(item.whatsapp)}</td>
                 <td><input class="editable" value="${escapeHtml(item.email)}" data-field="email" data-idx="${start + idx}"></td>
                 <td><input class="editable" value="${escapeHtml(item.direccion)}" data-field="direccion" data-idx="${start + idx}"></td>
                 <td><input class="editable" value="${escapeHtml(item.instagram)}" data-field="instagram" data-idx="${start + idx}"></td>
@@ -935,7 +919,7 @@
         try {
             alert("🔄 Enviando datos a Google Sheets...");
             await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(pipelineData) });
-            alert("✅ Solicitud de guardado enviada. Revisa tu hoja.\nSi los números de WhatsApp aparecen con comilla, es normal (evita #ERROR!).");
+            alert("✅ Solicitud de guardado enviada. Revisa tu hoja.");
         } catch(e) { alert("❌ Error al guardar: " + e.message); }
     }
 
@@ -946,9 +930,25 @@
             const data = await res.json();
             if (Array.isArray(data)) {
                 pipelineData = data.map(p => {
-                    if (!p.id) p.id = Date.now() + Math.random();
-                    if (p.whatsapp && typeof p.whatsapp === 'string' && p.whatsapp.startsWith("'")) p.whatsapp = p.whatsapp.substring(1);
-                    return p;
+                    const safeStr = (v) => v !== undefined && v !== null ? String(v) : '';
+                    return {
+                        id: p.id || Date.now() + Math.random(),
+                        nombre: safeStr(p.nombre),
+                        zona: safeStr(p.zona) || 'El Poblado',
+                        whatsapp: safeStr(p.whatsapp),
+                        email: safeStr(p.email),
+                        direccion: safeStr(p.direccion),
+                        instagram: safeStr(p.instagram),
+                        fechaContacto: safeStr(p.fechaContacto),
+                        segundoContacto: safeStr(p.segundoContacto),
+                        respuesta: safeStr(p.respuesta) || 'No',
+                        fechaVisita: safeStr(p.fechaVisita),
+                        estado: safeStr(p.estado) || 'Prospecto frío',
+                        gramos250: parseInt(p.gramos250) || 0,
+                        gramos500: parseInt(p.gramos500) || 0,
+                        score: safeStr(p.score) || '-',
+                        notas: safeStr(p.notas)
+                    };
                 });
                 if (pipelineData.length === 0) {
                     pipelineData.push({
@@ -995,7 +995,6 @@
             const idxInstagram = headers.findIndex(h => /instagram|ig/.test(h));
             if (idxNombre === -1) { alert("No se encontró columna con nombres."); return; }
             const existingNames = new Set(pipelineData.map(p => p.nombre?.toLowerCase() || ""));
-            const existingPhones = new Set(pipelineData.map(p => p.whatsapp).filter(p => p));
             const nuevos = [];
             for (let i = 1; i < rows.length; i++) {
                 const row = rows[i];
@@ -1014,7 +1013,7 @@
                 let instagram = idxInstagram !== -1 && row[idxInstagram] ? String(row[idxInstagram]).trim() : '';
                 if (instagram === 'N/A') instagram = '';
                 if (whatsapp) whatsapp = normalizeWhatsapp(whatsapp);
-                if (existingNames.has(nombre.toLowerCase()) || (whatsapp && existingPhones.has(whatsapp))) continue;
+                if (existingNames.has(nombre.toLowerCase())) continue;
                 nuevos.push({
                     id: Date.now() + Math.random(),
                     nombre, zona, whatsapp, email, direccion, instagram,
@@ -1022,7 +1021,6 @@
                     estado: 'Prospecto frío', gramos250: 0, gramos500: 0, score: '-', notas: 'Importado desde ARPA'
                 });
                 existingNames.add(nombre.toLowerCase());
-                if (whatsapp) existingPhones.add(whatsapp);
             }
             if (nuevos.length) {
                 pipelineData.push(...nuevos);
@@ -1082,8 +1080,16 @@
             const coords = await geocode(item.direccion);
             if (coords) {
                 const color = getEstadoColor(item.estado);
-                const marker = L.circleMarker([coords.lat, coords.lon], { radius: 8, fillColor: color, color: '#fff', weight: 2, fillOpacity: 0.8 }).addTo(markersLayer);
-                marker.bindPopup(`<b>${escapeHtml(item.nombre)}</b><br>📍 ${escapeHtml(item.direccion)}<br>📞 ${escapeHtml(item.whatsapp)}<br>✉️ ${escapeHtml(item.email)}<br><span style="color:${color}">Estado: ${item.estado}</span>`);
+                const marker = L.circleMarker([coords.lat, coords.lon], {
+                    radius: 8, fillColor: color, color: '#fff', weight: 2, fillOpacity: 0.8
+                }).addTo(markersLayer);
+                marker.bindPopup(`
+                    <b>${escapeHtml(item.nombre)}</b><br>
+                    📍 ${escapeHtml(item.direccion)}<br>
+                    📞 ${escapeHtml(item.whatsapp)}<br>
+                    ✉️ ${escapeHtml(item.email)}<br>
+                    <span style="color:${color}">Estado: ${item.estado}</span>
+                `);
             }
         }
     }
@@ -1100,6 +1106,7 @@
         saveToDriveSilent();
     }
 
+    // ==================== EVENTOS Y ARRANQUE ====================
     document.getElementById('save-drive-btn').onclick = saveToDriveManual;
     document.getElementById('load-drive-btn').onclick = loadFromDrive;
     document.getElementById('arpa-upload-btn').onclick = () => document.getElementById('arpa-file-input').click();
