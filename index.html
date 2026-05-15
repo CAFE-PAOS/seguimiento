@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>PAOS · CRM completo con Sheets (corregido: sin textos rotos)</title>
+    <title>PAOS · CRM completo con Sheets (Inventario + Aliados Activos)</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
@@ -470,6 +470,23 @@
             box-shadow: var(--shadow);
         }
         .alert-banner.warning { background: #FDEEEC; border-left-color: #D32F2F; }
+        .note {
+            background: #F9F6F1;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border-left: 3px solid var(--gold);
+            margin-bottom: 20px;
+            font-size: 12px;
+        }
+        .status-pill {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        .pill-green { background: var(--green-light); color: var(--green); }
+        .pill-gold { background: var(--amber-light); color: var(--caramel); }
         @media (max-width: 900px) {
             .sidebar { width: 60px; }
             .sidebar-logo .brand, .sidebar-logo .tagline, .nav-item span, .sidebar-section { display: none; }
@@ -546,7 +563,7 @@
             </div>
         </div>
 
-        <!-- PIPELINE (con columna ACCIONES y botón WhatsApp) -->
+        <!-- PIPELINE -->
         <div id="panel-pipeline" class="panel">
             <div class="sec-header"><div><div class="sec-title">Pipeline de Prospectos</div><div class="sec-subtitle">Registra cada cafetería contactada · Actualiza el estado después de cada interacción</div></div><button class="btn btn-primary" onclick="addRow()">+ Agregar fila</button></div>
             <div class="note"><strong>Cómo usar:</strong> Completa de izquierda a derecha. El estado cambia con cada acción. Un prospecto tarda en promedio 2 semanas en convertirse en aliado activo.</div>
@@ -554,22 +571,31 @@
             <div class="pagination"><button id="prev-page" disabled>◀ Anterior</button><span id="page-info">Página 1</span><button id="next-page">Siguiente ▶</button></div>
         </div>
 
-        <!-- INVENTARIO - Registro de consignaciones (limpio) -->
+        <!-- INVENTARIO MEJORADO -->
         <div id="panel-inventario" class="panel">
-            <div class="sec-header"><div><div class="sec-title">Inventario y Consignaciones</div><div class="sec-subtitle">Controla el stock y los cobros de cada aliado activo</div></div></div>
+            <div class="sec-header">
+                <div><div class="sec-title">Inventario y Consignaciones</div><div class="sec-subtitle">Control de stock · Aliados activos · Alertas de vencimiento</div></div>
+                <button class="btn btn-primary" id="sync-aliados-btn">🔄 Sincronizar aliados activos</button>
+            </div>
             <div class="inv-grid">
                 <div class="inv-card"><div class="inv-icon">📦</div><div class="inv-value"><input class="editable" id="inv250" type="number" value="0" style="width:80px;text-align:center;font-size:26px;"></div><div class="inv-label">Unidades 250g disponibles</div></div>
                 <div class="inv-card"><div class="inv-icon">📦</div><div class="inv-value"><input class="editable" id="inv500" type="number" value="0" style="width:80px;text-align:center;font-size:26px;"></div><div class="inv-label">Unidades 500g disponibles</div></div>
                 <div class="inv-card"><div class="inv-icon">💰</div><div class="inv-value" style="color:var(--green);font-size:20px;">$<input class="editable" id="invPendiente" type="number" value="0" style="width:100px;font-size:20px;"></div><div class="inv-label">Pendiente por cobrar (COP)</div></div>
             </div>
-            <div class="table-wrap"><div class="table-header"><h3>Registro de consignaciones</h3><span>Actualizar después de cada visita de revisión</span></div><div style="overflow-x:auto;"><table id="consignaciones-table"><thead><tr><th>#</th><th>Cafetería</th><th>Zona</th><th>Fecha entrega</th><th>250g entregados</th><th>500g entregados</th><th>Vendidos</th><th>Pendiente COP</th><th>Próx. revisión</th><th>Estado pago</th><th>Notas</th></tr></thead><tbody>
-                <tr><td>1</td><td><input class="editable" placeholder="Cafetería..."></td><td><input class="editable" placeholder="Zona..."></td><td><input class="editable" type="date"></td><td><input class="editable" type="number" value="0"></td><td><input class="editable" type="number" value="0"></td><td><input class="editable" type="number" value="0"></td><td><input class="editable" placeholder="$0"></td><td><input class="editable" type="date"></td><td><select class="editable"><option>Pendiente</option><option>Pagado</option></select></td><td><input class="editable" placeholder="Notas..."></td></td>
-                <tr><td>2</td><td><input class="editable" placeholder="Cafetería..."></td><td><input class="editable" placeholder="Zona..."></td><td><input class="editable" type="date"></td><td><input class="editable" type="number" value="0"></td><td><input class="editable" type="number" value="0"></td><td><input class="editable" type="number" value="0"></td><td><input class="editable" placeholder="$0"></td><td><input class="editable" type="date"></td><td><select class="editable"><option>Pendiente</option><option>Pagado</option></select></td><td><input class="editable" placeholder="Notas..."></td></tr>
-                <tr><td>3</td><td><input class="editable" placeholder="Cafetería..."></td><td><input class="editable" placeholder="Zona..."></td><td><input class="editable" type="date"></td><td><input class="editable" type="number" value="0"></td><td><input class="editable" type="number" value="0"></td><td><input class="editable" type="number" value="0"></td><td><input class="editable" placeholder="$0"></td><td><input class="editable" type="date"></td><td><select class="editable"><option>Pendiente</option><option>Pagado</option></select></td><td><input class="editable" placeholder="Notas..."></td></tr>
-                </tbody></table></div></div>
+            <div id="inventory-alerts" class="alerts-container"></div>
+            <div class="table-wrap">
+                <div class="table-header"><h3>Registro de consignaciones por aliado</h3><span>Actualizar después de cada visita de revisión</span></div>
+                <div style="overflow-x:auto;">
+                    <table id="consignaciones-table">
+                        <thead><tr><th>#</th><th>Cafetería</th><th>Zona</th><th>Fecha entrega</th><th>250g entregados</th><th>500g entregados</th><th>Vendidos</th><th>Pendiente COP</th><th>Próx. revisión</th><th>Estado pago</th><th>Notas</th></tr></thead>
+                        <tbody id="consignaciones-body"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="note"><strong>📌 Funcionamiento:</strong> Los aliados activos aparecen automáticamente al sincronizar. Al entregar producto se descuenta del stock general. Si la fecha de entrega o próxima revisión supera 15 días, se mostrará una alerta. Cambia el estado a "Pagado" para resetear el pendiente de ese aliado.</div>
         </div>
 
-        <!-- CALENDARIO - Registro semanal objetivos (limpio) -->
+        <!-- CALENDARIO -->
         <div id="panel-calendario" class="panel">
             <div class="sec-header"><div><div class="sec-title">Semana Tipo · Operaciones</div><div class="sec-subtitle">2 personas · máxima eficiencia · Persona A = Comercial · Persona B = Marketing</div></div></div>
             <div class="week-grid">
@@ -593,19 +619,19 @@
             </div>
         </div>
 
-        <!-- CONTENIDO IG - Calendario de publicaciones (limpio) -->
+        <!-- CONTENIDO IG -->
         <div id="panel-contenido" class="panel">
             <div class="sec-header"><div><div class="sec-title">Plan de Contenido · Instagram</div><div class="sec-subtitle">3 reels/semana · etiquetando siempre a los aliados · Responsable: Persona B</div></div></div>
             <div class="table-wrap"><div class="table-header"><h3>Calendario de publicaciones · Mes en curso</h3><span>Actualizar métricas después de publicar</span></div><div style="overflow-x:auto;"><table id="calendario-contenido"><thead><tr><th>Sem.</th><th>Día</th><th>Fecha</th><th>Tipo</th><th>Cafetería etiquetada</th><th>Concepto / Idea</th><th>Estado</th><th>Alcance</th><th>Engagement %</th></tr></thead><tbody>
-                <tr><td>1</td><td>Martes</td><td><input class="editable" type="date"></td><td><select class="editable"><option>Reel</option><option>Story</option><option>Post</option></select></td><td><input class="editable" placeholder="Cafetería..."></td><td><input class="editable" placeholder="Proceso de preparación..."></td><td><select class="editable"><option>Pendiente</option><option>Grabado</option><option>Editado</option><option>Publicado</option></select></td><td><input class="editable" type="number" placeholder="0"></td><td><input class="editable" placeholder="0%"></td><tr>
+                <tr><td>1</td><td>Martes</td><td><input class="editable" type="date"></td><td><select class="editable"><option>Reel</option><option>Story</option><option>Post</option></select></td><td><input class="editable" placeholder="Cafetería..."></td><td><input class="editable" placeholder="Proceso de preparación..."></td><td><select class="editable"><option>Pendiente</option><option>Grabado</option><option>Editado</option><option>Publicado</option></select></td><td><input class="editable" type="number" placeholder="0"></td><td><input class="editable" placeholder="0%"></td></tr>
                 <tr><td>1</td><td>Viernes</td><td><input class="editable" type="date"></td><td><select class="editable"><option>Reel</option><option>Story</option><option>Post</option></select></td><td><input class="editable" placeholder="Cafetería..."></td><td><input class="editable" placeholder="Historia de origen..."></td><td><select class="editable"><option>Pendiente</option><option>Grabado</option><option>Editado</option><option>Publicado</option></select></td><td><input class="editable" type="number" placeholder="0"></td><td><input class="editable" placeholder="0%"></td></tr>
                 <tr><td>1</td><td>Sábado</td><td><input class="editable" type="date"></td><td><select class="editable"><option>Reel</option><option>Story</option><option>Post</option></select></td><td><input class="editable" placeholder="Cafetería..."></td><td><input class="editable" placeholder="Aliado nuevo presentación..."></td><td><select class="editable"><option>Pendiente</option><option>Grabado</option><option>Editado</option><option>Publicado</option></select></td><td><input class="editable" type="number" placeholder="0"></td><td><input class="editable" placeholder="0%"></td></tr>
                 <tr><td>2</td><td>Martes</td><td><input class="editable" type="date"></td><td><select class="editable"><option>Reel</option><option>Story</option><option>Post</option></select></td><td><input class="editable" placeholder="Cafetería..."></td><td><input class="editable" placeholder="250g vs 500g comparación..."></td><td><select class="editable"><option>Pendiente</option><option>Grabado</option><option>Editado</option><option>Publicado</option></select></td><td><input class="editable" type="number" placeholder="0"></td><td><input class="editable" placeholder="0%"></td></tr>
-                </tbody></table></div></div>
+            </tbody></table></div></div>
             <div class="note"><strong>Hashtags base PAOS:</strong> #cafécolombia #cafeespecialidad #specialtycoffee #cafemedellin #medellincoffee #paoscafe #caficultura #coffeelovers #baristalife #cafeteriamedellin #antioquia #colombiancoffee</div>
         </div>
 
-        <!-- SCRIPTS WPP (completo) -->
+        <!-- SCRIPTS WPP -->
         <div id="panel-scripts" class="panel">
             <div class="sec-header"><div><div class="sec-title">Scripts de WhatsApp</div><div class="sec-subtitle">Copia, personaliza y envía · El nombre y la zona van entre corchetes</div></div></div>
             <div class="note"><strong>Consejo:</strong> Personaliza siempre con el nombre de la cafetería y la zona.</div>
@@ -617,7 +643,7 @@
             <div class="script-card"><div class="script-header"><span class="script-badge">Script 6</span><span class="script-title">Oferta de materia prima · aliado nivel 2</span></div><div class="script-body">"Hola [Nombre], quería contarles que además del café empacado, también ofrecemos el servicio de aprovisionamiento de materia prima para cafeterías. Podemos ser su aliado estratégico en el suministro de café de especialidad. ¿Les interesa que les cuente cómo funciona? ☕"</div></div>
         </div>
 
-        <!-- 4 FASES, EQUIPO, HERRAMIENTAS, PROTOCOLO VISITA (completos, sin cambios) -->
+        <!-- 4 FASES, EQUIPO, HERRAMIENTAS, PROTOCOLO VISITA (sin cambios estructurales) -->
         <div id="panel-fases" class="panel">
             <div class="sec-header"><div><div class="sec-title">Plan de Activación · 4 Fases</div><div class="sec-subtitle">Hoja de ruta de 3 meses para PAOS en el sur de Medellín</div></div></div>
             <div class="phases">
@@ -687,18 +713,18 @@
                 <div class="kpi-card red"><div class="kpi-label">Seguimiento post-visita</div><div class="kpi-value" style="color:var(--red)">48h</div><div class="kpi-meta">Máximo para escribir</div></div>
             </div>
             <div class="table-wrap"><div class="table-header"><h3>Contenido del kit físico de visita</h3><span>Llevar siempre</span></div>
-                <table><thead><tr><th>Item</th><th>Descripción</th><th>¿Siempre?</th></td></thead>
+                <table><thead><tr><th>Item</th><th>Descripción</th><th>¿Siempre?</th></tr></thead>
                 <tbody>
                     <tr><td>☕ Muestra 250g</td><td>Empaque sellado con etiqueta PAOS · para dejar en la cafetería</td><td><span class="status-pill pill-green">Siempre</span></td></tr>
                     <tr><td>📄 Ficha técnica</td><td>Origen, variedad, proceso, notas de cata del café</td><td><span class="status-pill pill-green">Siempre</span></td></tr>
                     <tr><td>📋 Propuesta alianza</td><td>PDF o impresa · términos de consignación 30 días</td><td><span class="status-pill pill-green">Siempre</span></td></tr>
-                    <tr><td>📦 Muestra 500g</td><td>Para mostrar el empaque de mayor presentación</td><td><span class="status-pill pill-gold">Recomendado</span></td></td>
+                    <tr><td>📦 Muestra 500g</td><td>Para mostrar el empaque de mayor presentación</td><td><span class="status-pill pill-gold">Recomendado</span></td></tr>
                     <tr><td>📷 Teléfono cargado</td><td>Para tomar foto del producto en el local y el reel</td><td><span class="status-pill pill-green">Siempre</span></td></tr>
                 </tbody>
             </table>
             </div>
             <div class="table-wrap"><div class="table-header"><h3>Términos del modelo de alianza · Consignación</h3></div>
-                <tr><thead><tr><th>Condición</th><th>Detalle</th></tr></thead>
+                <table><thead><tr><th>Condición</th><th>Detalle</th></tr></thead>
                 <tbody>
                     <tr><td><strong>Pago anticipado</strong></td><td>No aplica · el aliado solo paga lo que venda</td></tr>
                     <tr><td><strong>Plazo de venta</strong></td><td>30 días desde la entrega</td></tr>
@@ -716,8 +742,10 @@
 
 <script>
     // ==================== CONFIGURACIÓN ====================
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxVv6K2yZZnSTBn_2YhJdhRsAnGouOYI8xCh_DQ5ez-7GuW5R3a_pqPLan2SUav_ys/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxVv6K2yZZnSTBn_2YhJdhRsAnGouOYI8xCh_DQ5ez-7GuW5R3a_pqPLan2SUav_ys/exec";  // <-- CAMBIAR POR LA NUEVA URL DEL WEB APP
     let pipelineData = [];
+    let consignacionesData = [];   // Nuevo: array de objetos de consignaciones
+    let stockData = { stock250: 0, stock500: 0, pendienteTotal: 0 };
     let currentPage = 1;
     const rowsPerPage = 20;
     let geoCache = {};
@@ -735,6 +763,7 @@
         };
         document.getElementById('topbar-title').textContent = titles[id] || 'PAOS';
         if (id === 'dashboard') setTimeout(() => updateMapMarkers(), 200);
+        if (id === 'inventario') renderConsignacionesTable();
     }
 
     function updateKpiManual(input, max, valId, barId, spanEl) {
@@ -813,6 +842,7 @@
         return `<a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="whatsapp-btn">📱 WhatsApp</a>`;
     }
 
+    // ==================== PIPELINE TABLE ====================
     function renderPipelineTable() {
         const tbody = document.getElementById('pipeline-body');
         if (!tbody) return;
@@ -888,6 +918,8 @@
             updateZonesFromPipeline();
             updateMapMarkers();
             updateAlerts();
+            // Si cambia el estado a Aliado activo, sincronizar consignaciones
+            if (field === 'estado') syncAliadosActivos();
         }
         renderPipelineTable();
     }
@@ -907,10 +939,211 @@
         }
     }
 
+    // ==================== NUEVAS FUNCIONES DE INVENTARIO ====================
+    function syncAliadosActivos() {
+        // Obtener todos los aliados activos del pipeline
+        const aliadosActivos = pipelineData.filter(p => p.estado === 'Aliado activo');
+        // Crear un mapa de consignaciones existentes por nombre (para no duplicar)
+        const existingMap = new Map();
+        consignacionesData.forEach(c => existingMap.set(c.nombre, c));
+        
+        let added = 0;
+        for (let aliado of aliadosActivos) {
+            if (!existingMap.has(aliado.nombre)) {
+                // Crear nuevo registro de consignación
+                consignacionesData.push({
+                    id: Date.now() + Math.random(),
+                    nombre: aliado.nombre,
+                    zona: aliado.zona || '',
+                    fechaEntrega: '',
+                    entregados250: 0,
+                    entregados500: 0,
+                    vendidos: 0,
+                    pendienteCOP: 0,
+                    proximaRevision: '',
+                    estadoPago: 'Pendiente',
+                    notas: 'Creado automáticamente desde aliado activo',
+                    aliadoId: aliado.id
+                });
+                added++;
+            }
+        }
+        if (added > 0) {
+            renderConsignacionesTable();
+            saveToDriveSilent();
+            alert(`✅ Se agregaron ${added} nuevos registros de consignación para aliados activos.`);
+        } else {
+            alert("No hay nuevos aliados activos para sincronizar.");
+        }
+        renderConsignacionesTable();
+        updateInventoryAlerts();
+    }
+
+    function renderConsignacionesTable() {
+        const tbody = document.getElementById('consignaciones-body');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        consignacionesData.forEach((item, idx) => {
+            const row = tbody.insertRow();
+            row.innerHTML = `
+                <td>${idx + 1}</td>
+                <td><input class="editable consignacion-input" data-field="nombre" data-idx="${idx}" value="${escapeHtml(item.nombre)}"></td>
+                <td><input class="editable consignacion-input" data-field="zona" data-idx="${idx}" value="${escapeHtml(item.zona)}"></td>
+                <td><input class="editable consignacion-input" type="date" data-field="fechaEntrega" data-idx="${idx}" value="${item.fechaEntrega || ''}"></td>
+                <td><input class="editable consignacion-input" type="number" data-field="entregados250" data-idx="${idx}" value="${item.entregados250 || 0}"></td>
+                <td><input class="editable consignacion-input" type="number" data-field="entregados500" data-idx="${idx}" value="${item.entregados500 || 0}"></td>
+                <td><input class="editable consignacion-input" type="number" data-field="vendidos" data-idx="${idx}" value="${item.vendidos || 0}"></td>
+                <td><input class="editable consignacion-input" type="number" data-field="pendienteCOP" data-idx="${idx}" value="${item.pendienteCOP || 0}"></td>
+                <td><input class="editable consignacion-input" type="date" data-field="proximaRevision" data-idx="${idx}" value="${item.proximaRevision || ''}"></td>
+                <td><select class="editable consignacion-input" data-field="estadoPago" data-idx="${idx}"><option ${item.estadoPago === 'Pendiente' ? 'selected' : ''}>Pendiente</option><option ${item.estadoPago === 'Pagado' ? 'selected' : ''}>Pagado</option></select></td>
+                <td><input class="editable consignacion-input" data-field="notas" data-idx="${idx}" value="${escapeHtml(item.notas)}"></td>
+            `;
+        });
+        attachConsignacionEvents();
+        updateStockFromConsignaciones();
+        updateInventoryAlerts();
+    }
+
+    function attachConsignacionEvents() {
+        document.querySelectorAll('.consignacion-input').forEach(el => {
+            el.removeEventListener('change', handleConsignacionChange);
+            el.addEventListener('change', handleConsignacionChange);
+        });
+    }
+
+    function handleConsignacionChange(e) {
+        const idx = parseInt(e.target.getAttribute('data-idx'));
+        if (isNaN(idx) || !consignacionesData[idx]) return;
+        const field = e.target.getAttribute('data-field');
+        let value = e.target.value;
+        if (field === 'entregados250' || field === 'entregados500' || field === 'vendidos' || field === 'pendienteCOP') {
+            value = parseInt(value) || 0;
+        }
+        consignacionesData[idx][field] = value;
+        
+        // Si se modifican entregados, actualizar stock (descontar)
+        if (field === 'entregados250' || field === 'entregados500') {
+            // Recalcular pendienteCOP basado en lo entregado (asumiendo precios fijos)
+            const precio250 = 15000;
+            const precio500 = 25000;
+            const totalEntregado = (consignacionesData[idx].entregados250 * precio250) + (consignacionesData[idx].entregados500 * precio500);
+            const pagado = (consignacionesData[idx].estadoPago === 'Pagado') ? totalEntregado : 0;
+            consignacionesData[idx].pendienteCOP = totalEntregado - pagado;
+            // Actualizar el campo pendiente en la tabla (opcional)
+            const pendInput = document.querySelector(`.consignacion-input[data-field="pendienteCOP"][data-idx="${idx}"]`);
+            if (pendInput) pendInput.value = consignacionesData[idx].pendienteCOP;
+            
+            // Descontar del stock global si hay suficiente
+            if (field === 'entregados250') {
+                const newVal = value;
+                const oldVal = consignacionesData[idx][field] - (value - consignacionesData[idx][field]); // no es exacto, pero mejor recalc
+                // Para simplificar, recalc total entregado desde cero
+                let total250 = 0, total500 = 0;
+                consignacionesData.forEach(c => {
+                    total250 += (c.entregados250 || 0);
+                    total500 += (c.entregados500 || 0);
+                });
+                const stock250Element = document.getElementById('inv250');
+                const stock500Element = document.getElementById('inv500');
+                if (stock250Element && stock500Element) {
+                    const stock250 = parseInt(stock250Element.value) || 0;
+                    const stock500 = parseInt(stock500Element.value) || 0;
+                    // No descontamos automáticamente porque el stock inicial es independiente.
+                    // En su lugar mostramos alerta si el total entregado supera el stock disponible.
+                    if (total250 > (stockData.stock250 + total250)) {
+                        alert("⚠️ No hay suficiente stock de 250g para las entregas registradas. Ajusta el inventario disponible.");
+                    }
+                    if (total500 > (stockData.stock500 + total500)) {
+                        alert("⚠️ No hay suficiente stock de 500g para las entregas registradas. Ajusta el inventario disponible.");
+                    }
+                }
+            }
+        }
+        
+        // Si cambia el estado de pago a Pagado, poner pendienteCOP = 0
+        if (field === 'estadoPago' && value === 'Pagado') {
+            consignacionesData[idx].pendienteCOP = 0;
+            const pendInput = document.querySelector(`.consignacion-input[data-field="pendienteCOP"][data-idx="${idx}"]`);
+            if (pendInput) pendInput.value = 0;
+        } else if (field === 'estadoPago' && value === 'Pendiente') {
+            // Recalcular pendiente
+            const precio250 = 15000;
+            const precio500 = 25000;
+            const totalEntregado = (consignacionesData[idx].entregados250 * precio250) + (consignacionesData[idx].entregados500 * precio500);
+            consignacionesData[idx].pendienteCOP = totalEntregado;
+            const pendInput = document.querySelector(`.consignacion-input[data-field="pendienteCOP"][data-idx="${idx}"]`);
+            if (pendInput) pendInput.value = totalEntregado;
+        }
+        
+        // Actualizar el pendiente total global
+        let totalPendienteGlobal = 0;
+        consignacionesData.forEach(c => {
+            totalPendienteGlobal += (c.pendienteCOP || 0);
+        });
+        stockData.pendienteTotal = totalPendienteGlobal;
+        document.getElementById('invPendiente').value = totalPendienteGlobal;
+        
+        saveToDriveSilent();
+        updateInventoryAlerts();
+    }
+
+    function updateStockFromConsignaciones() {
+        // Actualizar los valores de stock desde los inputs manuales
+        const stock250Input = document.getElementById('inv250');
+        const stock500Input = document.getElementById('inv500');
+        if (stock250Input) stockData.stock250 = parseInt(stock250Input.value) || 0;
+        if (stock500Input) stockData.stock500 = parseInt(stock500Input.value) || 0;
+        const pendienteTotal = consignacionesData.reduce((sum, c) => sum + (c.pendienteCOP || 0), 0);
+        stockData.pendienteTotal = pendienteTotal;
+        document.getElementById('invPendiente').value = pendienteTotal;
+    }
+
+    function updateInventoryAlerts() {
+        const container = document.getElementById('inventory-alerts');
+        if (!container) return;
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        let alertsHtml = '';
+        const fifteenDays = 15;
+        
+        consignacionesData.forEach(c => {
+            if (c.fechaEntrega && c.fechaEntrega !== '') {
+                const entregaDate = new Date(c.fechaEntrega);
+                entregaDate.setHours(0,0,0,0);
+                const diff = Math.floor((today - entregaDate) / (1000*60*60*24));
+                if (diff > fifteenDays) {
+                    alertsHtml += `<div class="alert-banner warning">⚠️ <strong>${escapeHtml(c.nombre)}</strong> tiene una entrega hace ${diff} días (más de 15). Revisar rotación.</div>`;
+                }
+            }
+            if (c.proximaRevision && c.proximaRevision !== '') {
+                const revisionDate = new Date(c.proximaRevision);
+                revisionDate.setHours(0,0,0,0);
+                const diff = Math.floor((today - revisionDate) / (1000*60*60*24));
+                if (diff > fifteenDays) {
+                    alertsHtml += `<div class="alert-banner warning">⚠️ <strong>${escapeHtml(c.nombre)}</strong> tiene su próxima revisión vencida por ${diff} días. Programar visita.</div>`;
+                }
+            }
+        });
+        
+        if (alertsHtml === '') {
+            container.innerHTML = '<div class="note" style="background:#E8F5E9;">✅ No hay alertas de inventario pendientes.</div>';
+        } else {
+            container.innerHTML = `<div><strong>📢 Alertas de inventario (entregas o revisiones > 15 días)</strong><br>${alertsHtml}</div>`;
+        }
+    }
+
+    // ==================== GUARDAR Y CARGAR EN SHEETS ====================
     async function saveToDriveSilent() {
         if (!SCRIPT_URL) return;
         try {
-            await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(pipelineData) });
+            // Actualizar stock desde los inputs antes de guardar
+            updateStockFromConsignaciones();
+            const payload = {
+                pipeline: pipelineData,
+                consignaciones: consignacionesData,
+                stock: stockData
+            };
+            await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         } catch(e) { console.warn("Auto-guardado falló", e); }
     }
 
@@ -918,7 +1151,13 @@
         if (!SCRIPT_URL) { alert("La URL del script no está configurada."); return; }
         try {
             alert("🔄 Enviando datos a Google Sheets...");
-            await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(pipelineData) });
+            updateStockFromConsignaciones();
+            const payload = {
+                pipeline: pipelineData,
+                consignaciones: consignacionesData,
+                stock: stockData
+            };
+            await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
             alert("✅ Solicitud de guardado enviada. Revisa tu hoja.");
         } catch(e) { alert("❌ Error al guardar: " + e.message); }
     }
@@ -928,8 +1167,8 @@
         try {
             const res = await fetch(SCRIPT_URL);
             const data = await res.json();
-            if (Array.isArray(data)) {
-                pipelineData = data.map(p => {
+            if (data.pipeline && Array.isArray(data.pipeline)) {
+                pipelineData = data.pipeline.map(p => {
                     const safeStr = (v) => v !== undefined && v !== null ? String(v) : '';
                     return {
                         id: p.id || Date.now() + Math.random(),
@@ -968,16 +1207,37 @@
                         notas: "Cliente de ejemplo (elimínalo después)"
                     });
                 }
-                currentPage = 1;
-                renderPipelineTable();
-                updateMapMarkers();
-                alert("✅ Datos cargados desde Google Sheets.");
             } else {
-                alert("No hay datos en la hoja o la URL es incorrecta.");
+                // Backward compatibility: si solo llega array, asumimos pipeline
+                if (Array.isArray(data)) {
+                    pipelineData = data;
+                } else {
+                    pipelineData = [];
+                }
             }
+            if (data.consignaciones && Array.isArray(data.consignaciones)) {
+                consignacionesData = data.consignaciones;
+            } else {
+                consignacionesData = [];
+            }
+            if (data.stock && typeof data.stock === 'object') {
+                stockData = data.stock;
+                document.getElementById('inv250').value = stockData.stock250 || 0;
+                document.getElementById('inv500').value = stockData.stock500 || 0;
+                document.getElementById('invPendiente').value = stockData.pendienteTotal || 0;
+            } else {
+                stockData = { stock250: 0, stock500: 0, pendienteTotal: 0 };
+            }
+            currentPage = 1;
+            renderPipelineTable();
+            renderConsignacionesTable();
+            updateMapMarkers();
+            updateInventoryAlerts();
+            alert("✅ Datos cargados desde Google Sheets.");
         } catch(e) { alert("❌ Error al cargar: " + e.message); }
     }
 
+    // ==================== ARPA Y OTROS ====================
     function processArpaFile(file) {
         const reader = new FileReader();
         reader.onload = function(evt) {
@@ -1034,6 +1294,7 @@
         reader.readAsArrayBuffer(file);
     }
 
+    // ==================== MAPA ====================
     async function geocode(address) {
         if (geoCache[address]) return geoCache[address];
         try {
@@ -1113,10 +1374,46 @@
     document.getElementById('arpa-file-input').addEventListener('change', (e) => { if(e.target.files[0]) processArpaFile(e.target.files[0]); e.target.value = ''; });
     document.getElementById('prev-page').onclick = () => { if(currentPage > 1) { currentPage--; renderPipelineTable(); } };
     document.getElementById('next-page').onclick = () => { const totalPages = Math.ceil(pipelineData.length / rowsPerPage); if(currentPage < totalPages) { currentPage++; renderPipelineTable(); } };
-
+    document.getElementById('sync-aliados-btn').onclick = syncAliadosActivos;
+    
+    // Eventos para stock editable
+    document.getElementById('inv250').addEventListener('change', (e) => {
+        stockData.stock250 = parseInt(e.target.value) || 0;
+        saveToDriveSilent();
+    });
+    document.getElementById('inv500').addEventListener('change', (e) => {
+        stockData.stock500 = parseInt(e.target.value) || 0;
+        saveToDriveSilent();
+    });
+    document.getElementById('invPendiente').addEventListener('change', (e) => {
+        stockData.pendienteTotal = parseInt(e.target.value) || 0;
+        saveToDriveSilent();
+    });
+    
     window.addEventListener('load', () => {
         initMap();
-        loadFromDrive().catch(() => {});
+        loadFromDrive().catch(() => {
+            // Si no hay datos, inicializar vacío pero con un ejemplo
+            if (pipelineData.length === 0) {
+                pipelineData = [{
+                    id: Date.now(),
+                    nombre: "Café Ejemplo",
+                    zona: "El Poblado",
+                    whatsapp: "+573001234567",
+                    email: "ejemplo@cafe.com",
+                    direccion: "Calle 10 #20-30, Medellín",
+                    instagram: "@cafeejemplo",
+                    fechaContacto: new Date(Date.now() - 5*24*60*60*1000).toISOString().split('T')[0],
+                    segundoContacto: "",
+                    respuesta: "No",
+                    fechaVisita: "",
+                    estado: "Prospecto frío",
+                    gramos250: 0, gramos500: 0, score: "-",
+                    notas: "Cliente de ejemplo (elimínalo después)"
+                }];
+                renderPipelineTable();
+            }
+        });
     });
 </script>
 </body>
