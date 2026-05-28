@@ -571,7 +571,7 @@
             <div class="pagination"><button id="prev-page" disabled>◀ Anterior</button><span id="page-info">Página 1</span><button id="next-page">Siguiente ▶</button></div>
         </div>
 
-        <!-- INVENTARIO MEJORADO -->
+        <!-- INVENTARIO MEJORADO (con descuento real de stock) -->
         <div id="panel-inventario" class="panel">
             <div class="sec-header">
                 <div><div class="sec-title">Inventario y Consignaciones</div><div class="sec-subtitle">Control de stock · Aliados activos · Alertas de vencimiento</div></div>
@@ -592,7 +592,7 @@
                     </table>
                 </div>
             </div>
-            <div class="note"><strong>📌 Funcionamiento:</strong> Los aliados activos aparecen automáticamente al sincronizar. Al entregar producto se descuenta del stock general. Si la fecha de entrega o próxima revisión supera 15 días, se mostrará una alerta. Cambia el estado a "Pagado" para resetear el pendiente de ese aliado.</div>
+            <div class="note"><strong>📌 Funcionamiento:</strong> Los aliados activos aparecen automáticamente al sincronizar. Al registrar entregas de producto se <strong>descuenta del stock disponible</strong> en tiempo real. Si no hay suficiente stock, se mostrará una alerta y no se permitirá la entrega. Si la fecha de entrega o próxima revisión supera 15 días, se mostrará una alerta. Cambia el estado a "Pagado" para resetear el pendiente de ese aliado.</div>
         </div>
 
         <!-- CALENDARIO -->
@@ -742,9 +742,9 @@
 
 <script>
     // ==================== CONFIGURACIÓN ====================
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxVv6K2yZZnSTBn_2YhJdhRsAnGouOYI8xCh_DQ5ez-7GuW5R3a_pqPLan2SUav_ys/exec";  // <-- CAMBIAR POR LA NUEVA URL DEL WEB APP
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxRh91e_g_ekd8SOFoe1BEduv2tKlFvf4Fi1HfpQxPFq1ClnvzK8Dui0Z8xApAHKPJe/exec";
     let pipelineData = [];
-    let consignacionesData = [];   // Nuevo: array de objetos de consignaciones
+    let consignacionesData = [];
     let stockData = { stock250: 0, stock500: 0, pendienteTotal: 0 };
     let currentPage = 1;
     const rowsPerPage = 20;
@@ -918,7 +918,6 @@
             updateZonesFromPipeline();
             updateMapMarkers();
             updateAlerts();
-            // Si cambia el estado a Aliado activo, sincronizar consignaciones
             if (field === 'estado') syncAliadosActivos();
         }
         renderPipelineTable();
@@ -939,18 +938,14 @@
         }
     }
 
-    // ==================== NUEVAS FUNCIONES DE INVENTARIO ====================
+    // ==================== NUEVAS FUNCIONES DE INVENTARIO CON DESCUENTO REAL ====================
     function syncAliadosActivos() {
-        // Obtener todos los aliados activos del pipeline
         const aliadosActivos = pipelineData.filter(p => p.estado === 'Aliado activo');
-        // Crear un mapa de consignaciones existentes por nombre (para no duplicar)
         const existingMap = new Map();
         consignacionesData.forEach(c => existingMap.set(c.nombre, c));
-        
         let added = 0;
         for (let aliado of aliadosActivos) {
             if (!existingMap.has(aliado.nombre)) {
-                // Crear nuevo registro de consignación
                 consignacionesData.push({
                     id: Date.now() + Math.random(),
                     nombre: aliado.nombre,
@@ -1000,7 +995,6 @@
             `;
         });
         attachConsignacionEvents();
-        updateStockFromConsignaciones();
         updateInventoryAlerts();
     }
 
@@ -1011,71 +1005,69 @@
         });
     }
 
+    // Función principal que maneja el cambio en consignaciones y descuenta del stock
     function handleConsignacionChange(e) {
         const idx = parseInt(e.target.getAttribute('data-idx'));
         if (isNaN(idx) || !consignacionesData[idx]) return;
         const field = e.target.getAttribute('data-field');
-        let value = e.target.value;
-        if (field === 'entregados250' || field === 'entregados500' || field === 'vendidos' || field === 'pendienteCOP') {
-            value = parseInt(value) || 0;
-        }
-        consignacionesData[idx][field] = value;
+        let newValue = e.target.value;
         
-        // Si se modifican entregados, actualizar stock (descontar)
+        // Guardar el valor anterior antes de actualizar
+        const oldValue = consignacionesData[idx][field];
+        
+        // Convertir a número si es necesario
+        if (field === 'entregados250' || field === 'entregados500' || field === 'vendidos' || field === 'pendienteCOP') {
+            newValue = parseInt(newValue) || 0;
+        }
+        
+        // Si el campo es entregados250 o entregados500, aplicar descuento del stock
         if (field === 'entregados250' || field === 'entregados500') {
-            // Recalcular pendienteCOP basado en lo entregado (asumiendo precios fijos)
-            const precio250 = 15000;
-            const precio500 = 25000;
-            const totalEntregado = (consignacionesData[idx].entregados250 * precio250) + (consignacionesData[idx].entregados500 * precio500);
-            const pagado = (consignacionesData[idx].estadoPago === 'Pagado') ? totalEntregado : 0;
-            consignacionesData[idx].pendienteCOP = totalEntregado - pagado;
-            // Actualizar el campo pendiente en la tabla (opcional)
-            const pendInput = document.querySelector(`.consignacion-input[data-field="pendienteCOP"][data-idx="${idx}"]`);
-            if (pendInput) pendInput.value = consignacionesData[idx].pendienteCOP;
+            const cantidadAnterior = oldValue || 0;
+            const cantidadNueva = newValue;
+            const diferencia = cantidadNueva - cantidadAnterior;
             
-            // Descontar del stock global si hay suficiente
-            if (field === 'entregados250') {
-                const newVal = value;
-                const oldVal = consignacionesData[idx][field] - (value - consignacionesData[idx][field]); // no es exacto, pero mejor recalc
-                // Para simplificar, recalc total entregado desde cero
-                let total250 = 0, total500 = 0;
-                consignacionesData.forEach(c => {
-                    total250 += (c.entregados250 || 0);
-                    total500 += (c.entregados500 || 0);
-                });
-                const stock250Element = document.getElementById('inv250');
-                const stock500Element = document.getElementById('inv500');
-                if (stock250Element && stock500Element) {
-                    const stock250 = parseInt(stock250Element.value) || 0;
-                    const stock500 = parseInt(stock500Element.value) || 0;
-                    // No descontamos automáticamente porque el stock inicial es independiente.
-                    // En su lugar mostramos alerta si el total entregado supera el stock disponible.
-                    if (total250 > (stockData.stock250 + total250)) {
-                        alert("⚠️ No hay suficiente stock de 250g para las entregas registradas. Ajusta el inventario disponible.");
-                    }
-                    if (total500 > (stockData.stock500 + total500)) {
-                        alert("⚠️ No hay suficiente stock de 500g para las entregas registradas. Ajusta el inventario disponible.");
-                    }
+            if (diferencia !== 0) {
+                const tipo = field === 'entregados250' ? '250' : '500';
+                const stockActual = tipo === '250' ? stockData.stock250 : stockData.stock500;
+                const nuevoStock = stockActual - diferencia;
+                
+                if (nuevoStock < 0) {
+                    alert(`❌ No hay suficiente stock de ${tipo}g. Stock disponible: ${stockActual}. No se puede entregar ${diferencia > 0 ? diferencia : -diferencia} unidades adicionales.`);
+                    // Revertir el cambio en el input
+                    e.target.value = cantidadAnterior;
+                    return;
+                }
+                
+                // Actualizar stock
+                if (tipo === '250') {
+                    stockData.stock250 = nuevoStock;
+                    document.getElementById('inv250').value = nuevoStock;
+                } else {
+                    stockData.stock500 = nuevoStock;
+                    document.getElementById('inv500').value = nuevoStock;
                 }
             }
+            consignacionesData[idx][field] = cantidadNueva;
+        } else {
+            consignacionesData[idx][field] = newValue;
         }
         
-        // Si cambia el estado de pago a Pagado, poner pendienteCOP = 0
-        if (field === 'estadoPago' && value === 'Pagado') {
-            consignacionesData[idx].pendienteCOP = 0;
-            const pendInput = document.querySelector(`.consignacion-input[data-field="pendienteCOP"][data-idx="${idx}"]`);
-            if (pendInput) pendInput.value = 0;
-        } else if (field === 'estadoPago' && value === 'Pendiente') {
-            // Recalcular pendiente
+        // Recalcular pendienteCOP según entregas y estado de pago
+        if (field === 'entregados250' || field === 'entregados500' || field === 'estadoPago') {
             const precio250 = 15000;
             const precio500 = 25000;
             const totalEntregado = (consignacionesData[idx].entregados250 * precio250) + (consignacionesData[idx].entregados500 * precio500);
-            consignacionesData[idx].pendienteCOP = totalEntregado;
+            if (consignacionesData[idx].estadoPago === 'Pagado') {
+                consignacionesData[idx].pendienteCOP = 0;
+            } else {
+                consignacionesData[idx].pendienteCOP = totalEntregado;
+            }
+            // Actualizar el campo en la tabla visualmente
             const pendInput = document.querySelector(`.consignacion-input[data-field="pendienteCOP"][data-idx="${idx}"]`);
-            if (pendInput) pendInput.value = totalEntregado;
+            if (pendInput) pendInput.value = consignacionesData[idx].pendienteCOP;
         }
         
-        // Actualizar el pendiente total global
+        // Actualizar pendiente total global
         let totalPendienteGlobal = 0;
         consignacionesData.forEach(c => {
             totalPendienteGlobal += (c.pendienteCOP || 0);
@@ -1087,8 +1079,7 @@
         updateInventoryAlerts();
     }
 
-    function updateStockFromConsignaciones() {
-        // Actualizar los valores de stock desde los inputs manuales
+    function updateStockFromUI() {
         const stock250Input = document.getElementById('inv250');
         const stock500Input = document.getElementById('inv500');
         if (stock250Input) stockData.stock250 = parseInt(stock250Input.value) || 0;
@@ -1136,8 +1127,7 @@
     async function saveToDriveSilent() {
         if (!SCRIPT_URL) return;
         try {
-            // Actualizar stock desde los inputs antes de guardar
-            updateStockFromConsignaciones();
+            updateStockFromUI();
             const payload = {
                 pipeline: pipelineData,
                 consignaciones: consignacionesData,
@@ -1151,7 +1141,7 @@
         if (!SCRIPT_URL) { alert("La URL del script no está configurada."); return; }
         try {
             alert("🔄 Enviando datos a Google Sheets...");
-            updateStockFromConsignaciones();
+            updateStockFromUI();
             const payload = {
                 pipeline: pipelineData,
                 consignaciones: consignacionesData,
@@ -1207,13 +1197,10 @@
                         notas: "Cliente de ejemplo (elimínalo después)"
                     });
                 }
+            } else if (Array.isArray(data)) {
+                pipelineData = data;
             } else {
-                // Backward compatibility: si solo llega array, asumimos pipeline
-                if (Array.isArray(data)) {
-                    pipelineData = data;
-                } else {
-                    pipelineData = [];
-                }
+                pipelineData = [];
             }
             if (data.consignaciones && Array.isArray(data.consignaciones)) {
                 consignacionesData = data.consignaciones;
@@ -1376,7 +1363,6 @@
     document.getElementById('next-page').onclick = () => { const totalPages = Math.ceil(pipelineData.length / rowsPerPage); if(currentPage < totalPages) { currentPage++; renderPipelineTable(); } };
     document.getElementById('sync-aliados-btn').onclick = syncAliadosActivos;
     
-    // Eventos para stock editable
     document.getElementById('inv250').addEventListener('change', (e) => {
         stockData.stock250 = parseInt(e.target.value) || 0;
         saveToDriveSilent();
@@ -1393,7 +1379,6 @@
     window.addEventListener('load', () => {
         initMap();
         loadFromDrive().catch(() => {
-            // Si no hay datos, inicializar vacío pero con un ejemplo
             if (pipelineData.length === 0) {
                 pipelineData = [{
                     id: Date.now(),
